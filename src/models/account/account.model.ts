@@ -1,12 +1,15 @@
 import * as mongoose from "mongoose";
-import User from "./user.interface";
 
-const userSchema = new mongoose.Schema({
+import Account from "./account.interface";
+
+const accountSchema = new mongoose.Schema({
+    status: { type: String, default: "inactive" },
+    userType: { type: String, default: "user" },
     email: String,
-    name: String,
     password: String,
+    pseudonym: String,
 });
 
-const userModel = mongoose.model<User & mongoose.Document>("User", userSchema);
+const accountModel = mongoose.model<Account & mongoose.Document>("Account", accountSchema);
 
-export default userModel;
+export default accountModel;

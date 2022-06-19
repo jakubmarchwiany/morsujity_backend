@@ -1,6 +1,8 @@
 import * as bodyParser from "body-parser";
+import * as cookieParser from "cookie-parser";
 import * as express from "express";
 import * as mongoose from "mongoose";
+import * as cors from "cors";
 
 import Controller from "./interfaces/controller.interface";
 import errorMiddleware from "./middleware/error.middleware";
@@ -25,6 +27,8 @@ class App {
 
     private initializeMiddlewares() {
         this.app.use(bodyParser.json());
+        this.app.use(cookieParser());
+        this.app.use(cors(corsOptions));
     }
 
     private initializeErrorHandling() {
@@ -49,5 +53,19 @@ class App {
         });
     }
 }
+
+const whitelist = process.env.WHITELISTED_DOMAINS ? process.env.WHITELISTED_DOMAINS.split(",") : [];
+
+const corsOptions = {
+    origin: function (origin: any, callback: any) {
+        if (!origin || whitelist.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+
+    credentials: true,
+};
 
 export default App;

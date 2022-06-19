@@ -2,10 +2,9 @@ import * as express from "express";
 import { Request, Response, NextFunction } from "express";
 
 import Controller from "../interfaces/controller.interface";
-
 import accountModel from "../models/account/account.model";
 
-class PostsController implements Controller {
+class AccountController implements Controller {
     public path = "/account";
     public router = express.Router();
     private account = accountModel;
@@ -29,4 +28,4 @@ class PostsController implements Controller {
     };
 }
 
-export default PostsController;
+export default AccountController;
