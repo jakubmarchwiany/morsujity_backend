@@ -6,6 +6,6 @@ import AuthenticationController from "./controllers/authentication.controller";
 
 validateEnv();
 
-const app = new App([new AuthenticationController(),new AccountController()]);
+const app = new App([new AuthenticationController(), new AccountController()]);
 
 app.listen();

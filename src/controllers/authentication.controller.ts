@@ -12,8 +12,8 @@ import Controller from "../interfaces/controller.interface";
 import DataStoredInToken from "../models/token/dataStoredInToken.interface";
 import TokenData from "../models/token/tokenData.interface";
 
-import accountModel from "../models/account/account.model";
 import Account from "../models/account/account.interface";
+import accountModel from "../models/account/account.model";
 
 class AuthenticationController implements Controller {
     public path = "/auth";
@@ -31,45 +31,42 @@ class AuthenticationController implements Controller {
     }
 
     private registration = async (
-        request: express.Request,
-        response: express.Response,
+        req: express.Request,
+        res: express.Response,
         next: express.NextFunction
     ) => {
-        const userData: any = request.body; //to Do
+        const userData: any = req.body; //to Do
         console.log(userData);
         if (await this.account.findOne({ email: userData.email })) {
             next(new UserWithThatEmailAlreadyExistsException(userData.email));
         } else {
             const hashedPassword = await bcrypt.hash(userData.password, 10);
-          
-
             const user = await this.account.create({
                 ...userData,
                 password: hashedPassword,
             });
-            console.log(hashedPassword);
             user.password = undefined!;
-            console.log(user);
-            const tokenData = this.createToken(user);
-            response.setHeader("Set-Cookie", [this.createCookie(tokenData)]);
-            response.send(user);
+            // const tokenData = this.createToken(user);
+            // response.setHeader("Set-Cookie", [this.createCookie(tokenData)]);
+            // response.send({user: user, token: tokenData.token});
+            res.send({ message: "Udało się utworzyć konto" });
         }
     };
 
     private loggingIn = async (
-        request: express.Request,
-        response: express.Response,
+        req: express.Request,
+        res: express.Response,
         next: express.NextFunction
     ) => {
-        const logInData: any = request.body; //to Do
+        const logInData: any = req.body; //to Do
         const user = await this.account.findOne({ email: logInData.email });
         if (user) {
             const isPasswordMatching = await bcrypt.compare(logInData.password, user.password);
             if (isPasswordMatching) {
                 user.password = undefined!;
                 const tokenData = this.createToken(user);
-                response.setHeader("Set-Cookie", [this.createCookie(tokenData)]);
-                response.send(user);
+                res.setHeader("Set-Cookie", [this.createCookie(tokenData)]);
+                res.send({ user: user, token: tokenData.token, message: "Udało się zalogować" });
             } else {
                 next(new WrongCredentialsException());
             }
@@ -78,9 +75,9 @@ class AuthenticationController implements Controller {
         }
     };
 
-    private loggingOut = (request: express.Request, response: express.Response) => {
-        response.setHeader("Set-Cookie", ["Authorization=;Max-age=0"]);
-        response.send(200);
+    private loggingOut = (req: express.Request, res: express.Response) => {
+        res.setHeader("Set-Cookie", ["Authorization=;Max-age=0"]);
+        res.send({ message: "Udało się wylogować" });
     };
 
     private createCookie(tokenData: TokenData) {
