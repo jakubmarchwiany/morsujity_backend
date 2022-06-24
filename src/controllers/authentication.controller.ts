@@ -15,13 +15,17 @@ import TokenData from "../models/token/tokenData.interface";
 import Account from "../models/account/account.interface";
 import accountModel from "../models/account/account.model";
 
+import MailBot from "../utils/mailBot";
+
 class AuthenticationController implements Controller {
     public path = "/auth";
     public router = express.Router();
     private account = accountModel;
+    private mailBot;
 
     constructor() {
         this.initializeRoutes();
+        this.mailBot = new MailBot();
     }
 
     private initializeRoutes() {
@@ -46,6 +50,8 @@ class AuthenticationController implements Controller {
                 password: hashedPassword,
             });
             user.password = undefined!;
+
+            this.mailBot.sendVerificationMail(user.email, user._id);
             // const tokenData = this.createToken(user);
             // response.setHeader("Set-Cookie", [this.createCookie(tokenData)]);
             // response.send({user: user, token: tokenData.token});
