@@ -1,6 +1,8 @@
+import { Types } from "mongoose";
+
 interface TmpHash {
     hash: string;
-    accountRef: string;
+    accountRef: Types.ObjectId;
 }
 
 export default TmpHash;

@@ -17,10 +17,14 @@ import accountModel from "../models/account/account.model";
 
 import MailBot from "../utils/mailBot";
 
+import tmpHashModel from "../models/tmpHash/tmpHash.model";
+import TmpHash from "models/tmpHash/tmpHash.interface";
+
 class AuthenticationController implements Controller {
     public path = "/auth";
     public router = express.Router();
     private account = accountModel;
+    private tmpHash = tmpHashModel;
     private mailBot;
 
     constructor() {
@@ -32,6 +36,7 @@ class AuthenticationController implements Controller {
         this.router.post(`${this.path}/register`, validationMiddleware(), this.registration);
         this.router.post(`${this.path}/login`, this.loggingIn);
         this.router.post(`${this.path}/logout`, this.loggingOut);
+        this.router.get(`${this.path}/verifyEmail/:hash`, this.verifyEmail);
     }
 
     private registration = async (
@@ -84,6 +89,19 @@ class AuthenticationController implements Controller {
     private loggingOut = (req: express.Request, res: express.Response) => {
         res.setHeader("Set-Cookie", ["Authorization=;Max-age=0"]);
         res.send({ message: "Udało się wylogować" });
+    };
+
+    private verifyEmail = async (req: express.Request, res: express.Response) => {
+        let { hash } = req.params;
+        let tmpHash = await this.tmpHash.findOne({ hash: hash });
+        if (tmpHash) {
+            await this.account.findByIdAndUpdate(tmpHash?.accountRef, {
+                $set: { status: "active" },
+            });
+            tmpHash.delete();
+        }
+
+        res.redirect("/login");
     };
 
     private createCookie(tokenData: TokenData) {
