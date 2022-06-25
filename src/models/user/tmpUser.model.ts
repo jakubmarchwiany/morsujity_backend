@@ -12,13 +12,13 @@ const tmpUserSchema = new mongoose.Schema<TmpUser>({
 if (process.env.ENV == "development")
     tmpUserSchema.index(
         { expireIn: 1 },
-        { expireAfterSeconds: parseInt(process.env.DEV_ACCOUNT_EXPIRE_AFTER!) }
+        { expireAfterSeconds: parseInt(process.env.DEV_ACCOUNT_EXPIRE_AFTER!), name: "expireIn" }
     );
 
 if (process.env.ENV == "production")
     tmpUserSchema.index(
         { expireIn: 1 },
-        { expireAfterSeconds: parseInt(process.env.PRO_ACCOUNT_EXPIRE_AFTER!) }
+        { expireAfterSeconds: parseInt(process.env.PRO_ACCOUNT_EXPIRE_AFTER!), name: "expireIn" }
     );
 
 const tmpUserModel = mongoose.model<TmpUser>("TmpUser", tmpUserSchema);
