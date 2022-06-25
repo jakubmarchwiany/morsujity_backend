@@ -21,7 +21,7 @@ class Server {
 
     public listen() {
         this.app.listen(process.env.SERVER_PORT, () => {
-            console.log(`App listening on the port ${process.env.PORT}`);
+            console.log(`Server listening on the port ${process.env.SERVER_PORT}`);
         });
     }
 
@@ -41,17 +41,21 @@ class Server {
             this.app.use("/", controller.router);
         });
 
-        this.app.get("*", function (req, res) {
+        this.app.get("/", function (req, res) {
             res.sendFile(path.join(__dirname, "build", "index.html"));
         });
     }
 
     private connectToTheDatabase() {
-        const { MONGO_USER, MONGO_PASSWORD, MONGO_PATH,MONGO_LOCAL_PATH } = process.env;
+        const { ENV, DEV_MONGO_PATH, PRO_MONGO_USER, PRO_MONGO_PASSWORD, PRO_MONGO_PATH } =
+            process.env;
 
-        // mongoose.connect(`mongodb+srv://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_PATH}`);
-        mongoose.connect(`${MONGO_LOCAL_PATH}`);
+        if (ENV == "development") mongoose.connect(`${DEV_MONGO_PATH}`);
 
+        if (ENV == "production")
+            mongoose.connect(
+                `mongodb+srv://${PRO_MONGO_USER}:${PRO_MONGO_PASSWORD}@${PRO_MONGO_PATH}`
+            );
 
         const db = mongoose.connection;
         db.on("error", console.error.bind(console, "connection error:"));
@@ -61,7 +65,15 @@ class Server {
     }
 }
 
-const whitelist = process.env.WHITELISTED_DOMAINS ? process.env.WHITELISTED_DOMAINS.split(",") : [];
+let whitelist: any;
+if (process.env.ENV == "development")
+    whitelist = process.env.DEV_WHITELISTED_DOMAINS
+        ? process.env.DEV_WHITELISTED_DOMAINS.split(",")
+        : [];
+if (process.env.ENV == "production")
+    whitelist = process.env.PRO_WHITELISTED_DOMAINS
+        ? process.env.PRO_WHITELISTED_DOMAINS.split(",")
+        : [];
 
 const corsOptions = {
     origin: function (origin: any, callback: any) {
