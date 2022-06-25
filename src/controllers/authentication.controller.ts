@@ -4,27 +4,30 @@ import * as jwt from "jsonwebtoken";
 
 import validationMiddleware from "../middleware/validation.middleware";
 
+import EmailVerificationNotFoundOrExpired from "../middleware/exceptions/EmailVerificationNotFoundOrExpired";
 import UserWithThatEmailAlreadyExistsException from "../middleware/exceptions/UserWithThatEmailAlreadyExistsException";
 import WrongCredentialsException from "../middleware/exceptions/WrongCredentialsException";
-import EmailVerificationNotFoundOrExpired from "../middleware/exceptions/EmailVerificationNotFoundOrExpired";
 
 import Controller from "../interfaces/controller.interface";
 
 import DataStoredInToken from "../models/token/dataStoredInToken.interface";
-import TokenData from "../models/token/tokenData.interface";
 
-import Account from "../models/account/account.interface";
-import accountModel from "../models/account/account.model";
+import tmpHashModel from "../models/tmpHash/tmpHash.model";
+import userModel from "../models/user/user.model";
+
+import TmpUser from "models/user/tmpUser.interface";
+import tmpUserModel from "../models/user/tmpUser.model";
 
 import MailBot from "../utils/mailBot";
 
-import tmpHashModel from "../models/tmpHash/tmpHash.model";
 import HttpException from "../middleware/exceptions/HttpException";
-
+import TokenData from "models/token/tokenData.interface";
+import User from "models/user/user.interface";
 class AuthenticationController implements Controller {
     public path = "/auth";
     public router = express.Router();
-    private account = accountModel;
+    private user = userModel;
+    private tmpUser = tmpUserModel;
     private tmpHash = tmpHashModel;
     private mailBot;
 
@@ -37,7 +40,7 @@ class AuthenticationController implements Controller {
         this.router.post(`${this.path}/register`, validationMiddleware(), this.registration);
         this.router.post(`${this.path}/login`, this.loggingIn);
         this.router.post(`${this.path}/logout`, this.loggingOut);
-        this.router.get(`${this.path}/activeAccount/:hash`, this.activeAccount);
+        this.router.get(`${this.path}/verifyEmail/:hash`, this.verifyEmail);
     }
 
     private registration = async (
@@ -46,22 +49,20 @@ class AuthenticationController implements Controller {
         next: express.NextFunction
     ) => {
         const userData: any = req.body; //to Do
-        console.log(userData);
-        if (await this.account.findOne({ email: userData.email })) {
+        if (await this.tmpUser.findOne({ email: userData.email })) {
             next(new UserWithThatEmailAlreadyExistsException(userData.email));
         } else {
             const hashedPassword = await bcrypt.hash(userData.password, 10);
-            const user = await this.account.create({
+            const user = await this.tmpUser.create({
                 ...userData,
                 password: hashedPassword,
             });
-            user.password = undefined!;
 
-            this.mailBot.sendVerificationMail(user.email, user._id);
+            await this.mailBot.sendVerificationMail(user.email, user._id);
+            res.send({ message: "Udało się utworzyć konto" });
             // const tokenData = this.createToken(user);
             // response.setHeader("Set-Cookie", [this.createCookie(tokenData)]);
             // response.send({user: user, token: tokenData.token});
-            res.send({ message: "Udało się utworzyć konto" });
         }
     };
 
@@ -71,7 +72,7 @@ class AuthenticationController implements Controller {
         next: express.NextFunction
     ) => {
         const logInData: any = req.body; //to Do
-        const user = await this.account.findOne({ email: logInData.email });
+        const user = await this.user.findOne({ email: logInData.email });
         if (user) {
             const isPasswordMatching = await bcrypt.compare(logInData.password, user.password);
             if (isPasswordMatching) {
@@ -92,7 +93,7 @@ class AuthenticationController implements Controller {
         res.send({ message: "Udało się wylogować" });
     };
 
-    private activeAccount = async (
+    private verifyEmail = async (
         req: express.Request,
         res: express.Response,
         next: express.NextFunction
@@ -101,9 +102,17 @@ class AuthenticationController implements Controller {
             let { hash } = req.params;
             let tmpHash = await this.tmpHash.findOne({ hash: hash });
             if (tmpHash) {
-                await this.account.findByIdAndUpdate(tmpHash?.accountRef, {
-                    $set: { status: "active" },
-                });
+                let tmpUser = await this.tmpUser.findById(tmpHash.accountRef);
+                if (tmpUser) {
+                    let { email, password, pseudonym } = tmpUser;
+                    await this.user.create({
+                        email,
+                        password,
+                        pseudonym,
+                    });
+                }
+
+                tmpUser!.delete();
                 tmpHash.delete();
                 res.send({ message: "Udało się zweryfikować e-mail" });
             } else {
@@ -118,7 +127,7 @@ class AuthenticationController implements Controller {
         return `Authorization=${tokenData.token}; HttpOnly; Max-Age=${tokenData.expiresIn}`;
     }
 
-    private createToken(user: Account): TokenData {
+    private createToken(user: User): TokenData {
         const expiresIn = 60 * 60;
         const secret = process.env.JWT_SECRET;
         const dataStoredInToken: DataStoredInToken = {
