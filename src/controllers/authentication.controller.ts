@@ -2,8 +2,6 @@ import * as bcrypt from "bcryptjs";
 import * as express from "express";
 import * as jwt from "jsonwebtoken";
 
-import validationMiddleware from "../middleware/validation.middleware";
-
 import EmailVerificationNotFoundOrExpired from "../middleware/exceptions/EmailVerificationNotFoundOrExpired";
 import UserWithThatEmailAlreadyExistsException from "../middleware/exceptions/UserWithThatEmailAlreadyExistsException";
 import WrongCredentialsException from "../middleware/exceptions/WrongCredentialsException";
@@ -15,14 +13,15 @@ import DataStoredInToken from "../models/token/dataStoredInToken.interface";
 import tmpHashModel from "../models/tmpHash/tmpHash.model";
 import userModel from "../models/user/user.model";
 
-import TmpUser from "models/user/tmpUser.interface";
 import tmpUserModel from "../models/user/tmpUser.model";
 
 import MailBot from "../utils/mailBot";
 
-import HttpException from "../middleware/exceptions/HttpException";
 import TokenData from "models/token/tokenData.interface";
 import User from "models/user/user.interface";
+import HttpException from "../middleware/exceptions/HttpException";
+import registerUserSchema from "../middleware/schemas/registerUser";
+import validate from "../middleware/validate.middleware";
 class AuthenticationController implements Controller {
     public path = "/auth";
     public router = express.Router();
@@ -37,7 +36,7 @@ class AuthenticationController implements Controller {
     }
 
     private initializeRoutes() {
-        this.router.post(`${this.path}/register`, validationMiddleware(), this.registration);
+        this.router.post(`${this.path}/register`, validate(registerUserSchema), this.registration);
         this.router.post(`${this.path}/login`, this.loggingIn);
         this.router.post(`${this.path}/logout`, this.loggingOut);
         this.router.get(`${this.path}/verifyEmail/:hash`, this.verifyEmail);
