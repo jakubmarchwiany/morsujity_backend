@@ -1,7 +1,7 @@
 "use strict";
 import * as nodemailer from "nodemailer";
 import { Transporter } from "nodemailer";
-import * as bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 
 import tmpHashModel from "../models/tmpHash/tmpHash.model";
 import TmpHash from "models/tmpHash/tmpHash.interface";
@@ -30,7 +30,8 @@ class MailBot {
     }
 
     private async createTmpHash(targetMail: string, accountId: string) {
-        const verificationHash = await bcrypt.hash(targetMail, 10);
+        let verificationHash = await bcrypt.hash(targetMail, 10);
+        verificationHash = verificationHash.replace("/", "k");
         await this.tmpHash.create({
             hash: verificationHash,
             accountRef: accountId,
@@ -41,6 +42,7 @@ class MailBot {
     public sendVerificationMail = async (targetMail: string, accountId: string) => {
         try {
             let hash = await this.createTmpHash(targetMail, accountId);
+            
             let message = verificationMessage(hash);
 
             let mailOptions = {

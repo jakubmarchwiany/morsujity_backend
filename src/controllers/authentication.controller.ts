@@ -1,4 +1,4 @@
-import * as bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 import * as express from "express";
 import * as jwt from "jsonwebtoken";
 
@@ -6,6 +6,7 @@ import validationMiddleware from "../middleware/validation.middleware";
 
 import UserWithThatEmailAlreadyExistsException from "../middleware/exceptions/UserWithThatEmailAlreadyExistsException";
 import WrongCredentialsException from "../middleware/exceptions/WrongCredentialsException";
+import EmailVerificationNotFoundOrExpired from "../middleware/exceptions/EmailVerificationNotFoundOrExpired";
 
 import Controller from "../interfaces/controller.interface";
 
@@ -18,7 +19,7 @@ import accountModel from "../models/account/account.model";
 import MailBot from "../utils/mailBot";
 
 import tmpHashModel from "../models/tmpHash/tmpHash.model";
-import TmpHash from "models/tmpHash/tmpHash.interface";
+import HttpException from "../middleware/exceptions/HttpException";
 
 class AuthenticationController implements Controller {
     public path = "/auth";
@@ -36,7 +37,7 @@ class AuthenticationController implements Controller {
         this.router.post(`${this.path}/register`, validationMiddleware(), this.registration);
         this.router.post(`${this.path}/login`, this.loggingIn);
         this.router.post(`${this.path}/logout`, this.loggingOut);
-        this.router.get(`${this.path}/verifyEmail/:hash`, this.verifyEmail);
+        this.router.get(`${this.path}/activeAccount/:hash`, this.activeAccount);
     }
 
     private registration = async (
@@ -91,17 +92,26 @@ class AuthenticationController implements Controller {
         res.send({ message: "Udało się wylogować" });
     };
 
-    private verifyEmail = async (req: express.Request, res: express.Response) => {
-        let { hash } = req.params;
-        let tmpHash = await this.tmpHash.findOne({ hash: hash });
-        if (tmpHash) {
-            await this.account.findByIdAndUpdate(tmpHash?.accountRef, {
-                $set: { status: "active" },
-            });
-            tmpHash.delete();
+    private activeAccount = async (
+        req: express.Request,
+        res: express.Response,
+        next: express.NextFunction
+    ) => {
+        try {
+            let { hash } = req.params;
+            let tmpHash = await this.tmpHash.findOne({ hash: hash });
+            if (tmpHash) {
+                await this.account.findByIdAndUpdate(tmpHash?.accountRef, {
+                    $set: { status: "active" },
+                });
+                tmpHash.delete();
+                res.send({ message: "Udało się zweryfikować e-mail" });
+            } else {
+                next(new EmailVerificationNotFoundOrExpired());
+            }
+        } catch (error: any) {
+            next(new HttpException(500, error.message));
         }
-
-        res.redirect("/login");
     };
 
     private createCookie(tokenData: TokenData) {
