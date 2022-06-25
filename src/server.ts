@@ -13,7 +13,6 @@ class Server {
 
     constructor(controllers: Controller[]) {
         this.app = express();
-
         this.connectToTheDatabase();
         this.initializeMiddlewares();
         this.initializeControllers(controllers);
@@ -21,7 +20,7 @@ class Server {
     }
 
     public listen() {
-        this.app.listen(process.env.PORT, () => {
+        this.app.listen(process.env.SERVER_PORT, () => {
             console.log(`App listening on the port ${process.env.PORT}`);
         });
     }
@@ -48,9 +47,11 @@ class Server {
     }
 
     private connectToTheDatabase() {
-        const { MONGO_USER, MONGO_PASSWORD, MONGO_PATH } = process.env;
+        const { MONGO_USER, MONGO_PASSWORD, MONGO_PATH,MONGO_LOCAL_PATH } = process.env;
 
-        mongoose.connect(`mongodb+srv://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_PATH}`);
+        // mongoose.connect(`mongodb+srv://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_PATH}`);
+        mongoose.connect(`${MONGO_LOCAL_PATH}`);
+
 
         const db = mongoose.connection;
         db.on("error", console.error.bind(console, "connection error:"));

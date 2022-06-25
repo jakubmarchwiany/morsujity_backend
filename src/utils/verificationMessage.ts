@@ -1,4 +1,4 @@
-let {ENDPOINT} = process.env
+let { FRONT_ENDPOINT } = process.env;
 
 function verificationMessage(hash: string) {
     return `
@@ -17,13 +17,13 @@ function verificationMessage(hash: string) {
           <p class="my-4" style="box-sizing: border-box;margin-top: 1.5rem!important;margin-bottom: 1.5rem!important;orphans: 3;widows: 3;color: black;">
             Potwierdź, że chcesz użyć tego adresu e-mail do konta Morsujity. <br style="box-sizing: border-box;">Gdy to zrobisz, będziesz mógł zacząć korzystać z serwisu
           </p>
-          <a class="btn btn-primary" href="${ENDPOINT}/auth/verifyEmail/${hash}" style="background: #468faf;color: #fff;box-sizing: border-box;text-decoration: none;background-color: #468faf;-webkit-text-decoration-skip: objects;display: inline-block;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;padding: .375rem .75rem;font-size: 1rem;line-height: 1.5;border-radius: .25rem;transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;border-color: #468faf;">Zweryfikuj moje konto</a>
+          <a class="btn btn-primary" href="${FRONT_ENDPOINT}/auth/verifyEmail/${hash}" style="background: #468faf;color: #fff;box-sizing: border-box;text-decoration: none;background-color: #468faf;-webkit-text-decoration-skip: objects;display: inline-block;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;padding: .375rem .75rem;font-size: 1rem;line-height: 1.5;border-radius: .25rem;transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;border-color: #468faf;">Zweryfikuj moje konto</a>
           
           
           <p class="mt-4" style="box-sizing: border-box;margin-top: 1.5rem!important;margin-bottom: 1rem;orphans: 3;widows: 3;color: black;">
             Lub skopiuj ten link do swojej przeglądarki
           </p>
-          <a href="${ENDPOINT}/auth/verifyEmail/${hash}" class="link-warning" style="box-sizing: border-box;color: #ffc107;text-decoration: underline;-webkit-text-decoration-skip: objects;">${ENDPOINT}/auth/verifyEmail/${hash}</a>
+          <a href="${FRONT_ENDPOINT}/auth/verifyEmail/${hash}" class="link-warning" style="box-sizing: border-box;color: #ffc107;text-decoration: underline;-webkit-text-decoration-skip: objects;">${FRONT_ENDPOINT}/auth/verifyEmail/${hash}</a>
         </div>
       </div>
     </table>
