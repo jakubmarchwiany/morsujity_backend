@@ -1,4 +1,4 @@
-import { cleanEnv, num, port, str } from "envalid";
+import { bool, cleanEnv, num, port, str } from "envalid";
 
 function validateEnv() {
     cleanEnv(process.env, {
@@ -15,10 +15,13 @@ function validateEnv() {
         JWT_SECRET: str(),
         SERVER_HOST: str(),
         SERVER_MAIL_PORT: port(),
+        SERVER_MAIL_SECURE: bool(),
         SERVER_MAIL_USER: str(),
         SERVER_MAIL_PASS: str(),
-        DEV_ACCOUNT_EXPIRE_AFTER: num(),
-        PRO_ACCOUNT_EXPIRE_AFTER: num(),
+        DEV_USER_EXPIRE_AFTER: num(),
+        PRO_USER_EXPIRE_AFTER: num(),
+        DEV_ResetPasswordToken_EXPIRE_AFTER: num(),
+        PRO_ResetPasswordToken_EXPIRE_AFTER: num(),
     });
 }
 

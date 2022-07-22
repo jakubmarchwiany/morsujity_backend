@@ -1,5 +1,4 @@
 export {};
-
 declare global {
     namespace NodeJS {
         interface ProcessEnv {
@@ -16,10 +15,13 @@ declare global {
             JWT_SECRET: string;
             SERVER_HOST: string;
             SERVER_MAIL_PORT: string;
+            SERVER_MAIL_SECURE: string;
             SERVER_MAIL_USER: string;
             SERVER_MAIL_PASS: string;
-            DEV_ACCOUNT_EXPIRE_AFTER: string;
-            PRO_ACCOUNT_EXPIRE_AFTER: string;
+            DEV_USER_EXPIRE_AFTER: string;
+            PRO_USER_EXPIRE_AFTER: string;
+            DEV_ResetPasswordToken_EXPIRE_AFTER: string;
+            PRO_ResetPasswordToken_EXPIRE_AFTER: string;
         }
     }
 }
