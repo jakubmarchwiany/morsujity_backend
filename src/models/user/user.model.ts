@@ -11,6 +11,6 @@ const userSchema = new mongoose.Schema<User>({
     createdIn: { type: Date, default: new Date() },
 });
 
-const accountModel = mongoose.model<User>("User", userSchema);
+const userModel = mongoose.model<User>("User", userSchema);
 
-export default accountModel;
+export default userModel;
