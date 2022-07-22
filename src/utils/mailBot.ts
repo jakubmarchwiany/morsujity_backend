@@ -1,69 +1,110 @@
-"use strict";
-import * as bcrypt from "bcryptjs";
+// "use strict";
 import * as nodemailer from "nodemailer";
 import { Transporter } from "nodemailer";
+import * as smtpTransport from "nodemailer-smtp-transport";
+import * as handlebars from "handlebars";
+import * as fs from "fs";
 
-import tmpHashModel from "../models/tmpHash/tmpHash.model";
-import verificationMessage from "./verificationMessage";
+import passwordResetMessage from "./mailMessages/passwordResetMessage";
+import verificationMessage from "./mailMessages/verificationMessage";
 
-const { SERVER_HOST, SERVER_MAIL_PORT, SERVER_MAIL_USER, SERVER_MAIL_PASS } = process.env;
+const {
+    ENV,
+    SERVER_HOST,
+    SERVER_MAIL_PORT,
+    SERVER_MAIL_SECURE,
+    SERVER_MAIL_USER,
+    SERVER_MAIL_PASS,
+    DEV_FRONT_URL_ADDRESS,
+    PRO_FRONT_URL_ADDRESS,
+} = process.env;
 
 class MailBot {
     private transporter!: Transporter;
-    private tmpHash = tmpHashModel;
+    private url: string;
 
     constructor() {
         this.createTransport();
+        if (ENV == "development") {
+            this.url = DEV_FRONT_URL_ADDRESS!;
+        } else {
+            this.url = PRO_FRONT_URL_ADDRESS!;
+        }
     }
 
     private async createTransport() {
         try {
-            this.transporter = nodemailer.createTransport({
-                host: SERVER_HOST,
-                port: parseInt(SERVER_MAIL_PORT!),
-                secure: true,
-                auth: {
-                    user: SERVER_MAIL_USER,
-                    pass: SERVER_MAIL_PASS,
-                },
-                // tls: {
-                //     rejectUnauthorized: false,
-                // },
-            });
+            this.transporter = nodemailer.createTransport(
+                smtpTransport({
+                    host: SERVER_HOST,
+                    port: parseInt(SERVER_MAIL_PORT!),
+                    secure: Boolean(SERVER_MAIL_SECURE),
+                    auth: {
+                        user: SERVER_MAIL_USER,
+                        pass: SERVER_MAIL_PASS,
+                    },
+                })
+            );
         } catch (error) {
             setTimeout(() => {
                 this.createTransport();
             }, 10000);
         }
     }
-
-    private async createTmpHash(targetMail: string, accountId: string) {
-        let verificationHash = await bcrypt.hash(targetMail, 10);
-        verificationHash = verificationHash.replace(/\//g, "k");
-        await this.tmpHash.create({
-            hash: verificationHash,
-            accountRef: accountId,
-        });
-        return verificationHash;
-    }
-
-    public sendVerificationMail = async (targetMail: string, accountId: string) => {
+    public sendMailEmailUserVerification = async (targetMail: string, token: string) => {
         try {
-            let hash = await this.createTmpHash(targetMail, accountId);
+            let html = fs.readFileSync(
+                "./utils/mailMessages/emailVerification.html",
+                "utf8"
+            );
+            let template = handlebars.compile(html);
 
-            let message = verificationMessage(hash);
+            let variables = {
+                endPoint: this.url + "/verifyEmail/" + token,
+            };
+
+            let htmlToSend = template(variables);
 
             let mailOptions = {
                 from: '"Bot morsujity" <bot@morsujity.pl>', // sender address
                 to: targetMail, // list of receivers
                 subject: "Zweryfikuj konto", // Subject line
-                html: message, // html body
+                html: htmlToSend, // html body
             };
 
             this.transporter.sendMail(mailOptions);
-        } catch (error) {
+        } catch (error: any) {
             setTimeout(() => {
-                this.sendVerificationMail(targetMail, accountId);
+                this.sendMailEmailUserVerification(targetMail, token);
+            }, 10000);
+        }
+    };
+
+    public sendMailResetUserPassword = async (targetMail: string, token: string) => {
+        try {
+            let html = fs.readFileSync(
+                "./utils/mailMessages/passwordReset.html",
+                "utf8"
+            );
+            let template = handlebars.compile(html);
+
+            let variables = {
+                endPoint: this.url + "/resetPassword/" + token,
+            };
+
+            let htmlToSend = template(variables);
+
+            let mailOptions = {
+                from: '"Bot morsujity" <bot@morsujity.pl>', // sender address
+                to: targetMail, // list of receivers
+                subject: "Zresetuj Hasło", // Subject line
+                html: htmlToSend, // html body
+            };
+
+            this.transporter.sendMail(mailOptions);
+        } catch (error: any) {
+            setTimeout(() => {
+                this.sendMailEmailUserVerification(targetMail, token);
             }, 10000);
         }
     };
