@@ -1,12 +1,9 @@
 // "use strict";
+import * as fs from "fs";
+import * as handlebars from "handlebars";
 import * as nodemailer from "nodemailer";
 import { Transporter } from "nodemailer";
 import * as smtpTransport from "nodemailer-smtp-transport";
-import * as handlebars from "handlebars";
-import * as fs from "fs";
-
-import passwordResetMessage from "./mailMessages/passwordResetMessage";
-import verificationMessage from "./mailMessages/verificationMessage";
 
 const {
     ENV,
@@ -53,10 +50,7 @@ class MailBot {
     }
     public sendMailEmailUserVerification = async (targetMail: string, token: string) => {
         try {
-            let html = fs.readFileSync(
-                "./utils/mailMessages/emailVerification.html",
-                "utf8"
-            );
+            let html = fs.readFileSync("./utils/mailMessages/emailVerification.html", "utf8");
             let template = handlebars.compile(html);
 
             let variables = {
@@ -82,10 +76,7 @@ class MailBot {
 
     public sendMailResetUserPassword = async (targetMail: string, token: string) => {
         try {
-            let html = fs.readFileSync(
-                "./utils/mailMessages/passwordReset.html",
-                "utf8"
-            );
+            let html = fs.readFileSync("./utils/mailMessages/passwordReset.html", "utf8");
             let template = handlebars.compile(html);
 
             let variables = {
