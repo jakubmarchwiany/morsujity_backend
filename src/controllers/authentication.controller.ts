@@ -2,6 +2,7 @@ import * as bcrypt from "bcryptjs";
 import * as crypto from "crypto";
 import * as express from "express";
 import * as jwt from "jsonwebtoken";
+import * as sha256 from "sha256";
 
 import EmailVerificationNotFoundOrExpired from "../middleware/exceptions/EmailVerificationNotFoundOrExpired";
 import HttpException from "../middleware/exceptions/HttpException";
@@ -27,6 +28,7 @@ import registerUserSchema, { registerUserData } from "../middleware/schemas/regi
 import validate from "../middleware/validate.middleware";
 
 import catchError from "../utils/catchError";
+import newPasswordSchema, { newPasswordData } from "../middleware/schemas/newPassword";
 
 class AuthenticationController implements Controller {
     public path = "/auth";
@@ -58,9 +60,11 @@ class AuthenticationController implements Controller {
             catchError(this.loggingIn)
         );
         this.router.post(`${this.path}/logout`, this.loggingOut);
+        this.router.post(`${this.path}/reqResetPassword`, catchError(this.reqResetPassword));
         this.router.post(
             `${this.path}/resetPassword`,
-            catchError(this.createResetUserPasswordToken)
+            validate(newPasswordSchema),
+            catchError(this.resetPassword)
         );
     }
 
@@ -151,17 +155,45 @@ class AuthenticationController implements Controller {
         res.send({ message: "Udało się wylogować" });
     };
 
-    private createResetUserPasswordToken = async (req: express.Request, res: express.Response) => {
+    private reqResetPassword = async (req: express.Request, res: express.Response) => {
         let { email } = req.body;
         let user = await this.user.findOne({ email: email });
         if (user) {
             let randomBytes = crypto.randomBytes(64).toString("hex");
-            let token = await bcrypt.hash(randomBytes, 10);
+            // let token = await bcrypt.hash(randomBytes, 10);
+
+            let token = sha256(randomBytes);
             await this.passwordResetToken.create({ token, userId: user.id });
-            await this.mailBot.sendMailResetUserPassword(email, token);
+            await this.mailBot.sendMailResetUserPassword(email, randomBytes);
         }
 
         res.send({ message: "Email resetujący hasło został wysłany" });
+    };
+
+    private resetPassword = async (
+        req: express.Request,
+        res: express.Response,
+        next: express.NextFunction
+    ) => {
+        let { newPassword, token }: newPasswordData = req.body;
+
+        let hashedToken = sha256(token);
+
+        let foundToken = await this.passwordResetToken.findOne({ token: hashedToken });
+
+        if (foundToken == null) {
+            next(new HttpException(400, "Nie poprawny token"));
+        }
+
+        await this.passwordResetToken.deleteMany({ userId: foundToken!.userId });
+
+        let hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        await this.user.updateOne(
+            { _id: foundToken!.userId },
+            { $set: { password: hashedPassword } }
+        );
+        res.send({ message: "Hasło zostało zresetowane" });
     };
 }
 
