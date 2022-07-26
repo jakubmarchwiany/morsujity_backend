@@ -44,25 +44,17 @@ class AuthenticationController implements Controller {
     }
 
     private initializeRoutes() {
-        this.router.post(
-            `${this.path}/register`,
-            validate(registerUserSchema),
-            catchError(this.registerUser)
-        );
+        this.router.post(`/register`, validate(registerUserSchema), catchError(this.registerUser));
         this.router.get(
-            `${this.path}/verifyUserEmail/:token`,
+            `/verifyUserEmail/:token`,
             validate(emailTokenSchema),
             catchError(this.verifyUserEmail)
         );
+        this.router.post(`/login`, validate(loginUserSchema), catchError(this.loggingIn));
+        this.router.post(`/logout`, this.loggingOut);
+        this.router.post(`/reqResetPassword`, catchError(this.reqResetPassword));
         this.router.post(
-            `${this.path}/login`,
-            validate(loginUserSchema),
-            catchError(this.loggingIn)
-        );
-        this.router.post(`${this.path}/logout`, this.loggingOut);
-        this.router.post(`${this.path}/reqResetPassword`, catchError(this.reqResetPassword));
-        this.router.post(
-            `${this.path}/resetPassword`,
+            `/resetPassword`,
             validate(newPasswordSchema),
             catchError(this.resetPassword)
         );

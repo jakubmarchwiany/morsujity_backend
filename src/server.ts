@@ -38,10 +38,10 @@ class Server {
 
     private initializeControllers(controllers: Controller[]) {
         controllers.forEach((controller) => {
-            this.app.use("/", controller.router);
+            console.log(controller.path);
+            this.app.use("/server" + controller.path, controller.router);
         });
-
-        this.app.get("/", function (req, res) {
+        this.app.get("*", function (req, res) {
             res.sendFile(path.join(__dirname, "build", "index.html"));
         });
     }
