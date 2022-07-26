@@ -2,6 +2,11 @@ import * as mongoose from "mongoose";
 
 import TmpUser from "./tmpUser.interface";
 
+let expireIn;
+if (process.env.ENV == "development") {
+    expireIn = parseInt(process.env.DEV_USER_EXPIRE_AFTER!);
+} else expireIn = parseInt(process.env.PRO_USER_EXPIRE_AFTER!);
+
 const tmpUserSchema = new mongoose.Schema<TmpUser>({
     email: String,
     password: String,
@@ -9,17 +14,7 @@ const tmpUserSchema = new mongoose.Schema<TmpUser>({
     expireIn: { type: Date, default: new Date() },
 });
 
-if (process.env.ENV == "development")
-    tmpUserSchema.index(
-        { expireIn: 1 },
-        { expireAfterSeconds: parseInt(process.env.DEV_ACCOUNT_EXPIRE_AFTER!), name: "expireIn" }
-    );
-
-if (process.env.ENV == "production")
-    tmpUserSchema.index(
-        { expireIn: 1 },
-        { expireAfterSeconds: parseInt(process.env.PRO_ACCOUNT_EXPIRE_AFTER!), name: "expireIn" }
-    );
+tmpUserSchema.index({ expireIn: 1 }, { expireAfterSeconds: expireIn, name: "expireIn" });
 
 const tmpUserModel = mongoose.model<TmpUser>("TmpUser", tmpUserSchema);
 
