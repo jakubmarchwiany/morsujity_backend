@@ -96,6 +96,7 @@ class AuthenticationController implements Controller {
                 pseudonym,
             });
 
+            await this.tmpUser.deleteMany({ email: email });
             tmpUser.delete();
             res.send({ message: "Udało się zweryfikować e-mail" });
         } else {
@@ -121,6 +122,9 @@ class AuthenticationController implements Controller {
                 next(new WrongCredentialsException());
             }
         } else {
+            const user = await this.tmpUser.findOne({ email: logInData.email });
+            if (user)
+                next(new HttpException(400, `Konto jest nieaktywne. Sprawdź mail: ${user.email}`));
             next(new WrongCredentialsException());
         }
     };
@@ -130,7 +134,7 @@ class AuthenticationController implements Controller {
         const secret = process.env.JWT_SECRET;
         const dataStoredInToken: DataStoredInToken = {
             _id: user._id,
-            userType: "user",
+            userType: user.type,
         };
         return {
             expiresIn,
@@ -139,11 +143,11 @@ class AuthenticationController implements Controller {
     }
 
     private createCookie(tokenData: TokenData) {
-        return `Authorization=${tokenData.token}; HttpOnly; Max-Age=${tokenData.expiresIn}`;
+        return `Authorization=${tokenData.token}; Max-Age=${tokenData.expiresIn}; path=/;`;
     }
 
     private loggingOut = (req: express.Request, res: express.Response) => {
-        res.setHeader("Set-Cookie", ["Authorization=;Max-age=0"]);
+        res.setHeader("Set-Cookie", ["Authorization=; Max-Age=0; path=/;"]);
         res.send({ message: "Udało się wylogować" });
     };
 
