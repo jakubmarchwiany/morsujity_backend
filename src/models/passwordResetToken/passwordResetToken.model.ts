@@ -5,8 +5,8 @@ const Schema = mongoose.Schema;
 
 let expireIn;
 if (process.env.ENV == "development") {
-    expireIn = parseInt(process.env.DEV_ResetPasswordToken_EXPIRE_AFTER!);
-} else expireIn = parseInt(process.env.PRO_ResetPasswordToken_EXPIRE_AFTER!);
+    expireIn = parseInt(process.env.DEV_RESET_PASSWORD_TOKEN_EXPIRE_AFTER!);
+} else expireIn = parseInt(process.env.PRO_RESET_PASSWORD_TOKEN_EXPIRE_AFTER!);
 
 const passwordResetTokenSchema = new mongoose.Schema<PasswordResetToken>({
     expireIn: {
