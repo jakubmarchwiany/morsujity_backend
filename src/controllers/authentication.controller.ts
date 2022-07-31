@@ -30,6 +30,11 @@ import validate from "../middleware/validate.middleware";
 import catchError from "../utils/catchError";
 import newPasswordSchema, { newPasswordData } from "../middleware/schemas/newPassword";
 
+let { ENV, DEF_USER_IMAGE_PATH, DEV_BACKEND_URL_ADDRESS, PRO_FRONT_URL_ADDRESS } = process.env;
+
+let frontUrlAddress: string;
+if (ENV == "development") frontUrlAddress = DEV_BACKEND_URL_ADDRESS!;
+else frontUrlAddress = PRO_FRONT_URL_ADDRESS!;
 class AuthenticationController implements Controller {
     public path = "/auth";
     public router = express.Router();
@@ -39,8 +44,8 @@ class AuthenticationController implements Controller {
     private mailBot;
 
     constructor() {
-        this.initializeRoutes();
         this.mailBot = new MailBot();
+        this.initializeRoutes();
     }
 
     private initializeRoutes() {
@@ -114,6 +119,7 @@ class AuthenticationController implements Controller {
         if (user) {
             const isPasswordMatching = await bcrypt.compare(logInData.password, user.password);
             if (isPasswordMatching) {
+                user!.image = `${frontUrlAddress}/${DEF_USER_IMAGE_PATH}/${user!.image}`;
                 user.password = undefined!;
                 const tokenData = this.createAuthenticationToken(user);
                 res.setHeader("Set-Cookie", [this.createCookie(tokenData)]);

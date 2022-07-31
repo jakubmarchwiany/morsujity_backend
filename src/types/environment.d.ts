@@ -5,6 +5,7 @@ declare global {
             ENV: "development" | "production";
             SERVER_PORT: string;
             DEV_FRONT_URL_ADDRESS: string;
+            DEV_BACKEND_URL_ADDRESS: string;
             PRO_FRONT_URL_ADDRESS: string;
             DEV_WHITELISTED_DOMAINS: string;
             PRO_WHITELISTED_DOMAINS: string;
@@ -20,8 +21,8 @@ declare global {
             SERVER_MAIL_PASS: string;
             DEV_USER_EXPIRE_AFTER: string;
             PRO_USER_EXPIRE_AFTER: string;
-            DEV_ResetPasswordToken_EXPIRE_AFTER: string;
-            PRO_ResetPasswordToken_EXPIRE_AFTER: string;
+            DEF_USER_IMAGE: string;
+            DEF_USER_IMAGE_PATH: string;
         }
     }
 }
