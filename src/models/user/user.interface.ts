@@ -15,6 +15,7 @@ interface User {
     status: status;
     type: type;
     pseudonym: string;
+    image: string;
     createdIn: Date;
 }
 

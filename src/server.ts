@@ -30,6 +30,7 @@ class Server {
         this.app.use(cookieParser());
         this.app.use(cors(corsOptions));
         this.app.use(express.static(path.join(__dirname, "build")));
+        this.app.use(express.static("public"));
     }
 
     private initializeErrorHandling() {
@@ -38,7 +39,6 @@ class Server {
 
     private initializeControllers(controllers: Controller[]) {
         controllers.forEach((controller) => {
-            console.log(controller.path);
             this.app.use("/server" + controller.path, controller.router);
         });
         this.app.get("*", function (req, res) {

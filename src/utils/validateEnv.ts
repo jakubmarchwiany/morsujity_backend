@@ -5,6 +5,7 @@ function validateEnv() {
         ENV: str({ choices: ["development", "production"] }),
         SERVER_PORT: port(),
         DEV_FRONT_URL_ADDRESS: str(),
+        DEV_BACKEND_URL_ADDRESS: str(),
         PRO_FRONT_URL_ADDRESS: str(),
         DEV_WHITELISTED_DOMAINS: str(),
         PRO_WHITELISTED_DOMAINS: str(),
@@ -20,8 +21,10 @@ function validateEnv() {
         SERVER_MAIL_PASS: str(),
         DEV_USER_EXPIRE_AFTER: num(),
         PRO_USER_EXPIRE_AFTER: num(),
-        DEV_ResetPasswordToken_EXPIRE_AFTER: num(),
-        PRO_ResetPasswordToken_EXPIRE_AFTER: num(),
+        DEV_RESET_PASSWORD_TOKEN_EXPIRE_AFTER: str(),
+        PRO_RESET_PASSWORD_TOKEN_EXPIRE_AFTER: str(),
+        DEF_USER_IMAGE: str(),
+        DEF_USER_IMAGE_PATH: str(),
     });
 }
 
