@@ -33,7 +33,19 @@ class UserController implements Controller {
             this.imageBot.upload.single("userImage"),
             catchError(this.newImage)
         );
+        this.router.post(`/changePseudonym`, authMiddleware, catchError(this.changeUserPseudonym));
     }
+
+    private getUserData = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+        let user = await this.user.findById(req.user.id, { password: 0 });
+        user!.image = `${frontUrlAddress}/${DEF_USER_IMAGE_PATH}/${user!.image}`;
+        res.send({ user: user });
+    };
+
+    private changeUserPseudonym = async (req: RequestWithUser, res: Response) => {
+        await this.user.findByIdAndUpdate(req.user.id, { pseudonym: req.body.pseudonym });
+        res.send({ message: "Udało się zaktualizować ksywkę" });
+    };
 
     private newImage = async (req: RequestWithUser, res: Response, next: NextFunction) => {
         let fileName = await this.imageBot.saveNewUserImage(req.file);
@@ -47,12 +59,6 @@ class UserController implements Controller {
         await this.user.findByIdAndUpdate(req.user.id, { image: fileName });
 
         res.send({ status: "success" });
-    };
-
-    private getUserData = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-        let user = await this.user.findById(req.user.id, { password: 0 });
-        user!.image = `${frontUrlAddress}/${DEF_USER_IMAGE_PATH}/${user!.image}`;
-        res.send({ user: user });
     };
 }
 

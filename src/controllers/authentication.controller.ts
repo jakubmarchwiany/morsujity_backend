@@ -17,7 +17,7 @@ import passwordResetTokenModel from "../models/passwordResetToken/passwordResetT
 import tmpUserModel from "../models/user/tmpUser.model";
 import userModel from "../models/user/user.model";
 
-import MailBot from "../utils/mailBot";
+import MailBot from "../utils/MailBot";
 
 import TokenData from "models/authenticationToken/tokenData.interface";
 import User from "models/user/user.interface";
@@ -30,6 +30,9 @@ import validate from "../middleware/validate.middleware";
 import catchError from "../utils/catchError";
 import newPasswordSchema, { newPasswordData } from "../middleware/schemas/newPassword";
 
+import authMiddleware from "../middleware/auth.middleware";
+import RequestWithUser from "interfaces/requestWithUser.interface";
+
 let { ENV, DEF_USER_IMAGE_PATH, DEV_BACKEND_URL_ADDRESS, PRO_FRONT_URL_ADDRESS } = process.env;
 
 let frontUrlAddress: string;
@@ -37,7 +40,7 @@ if (ENV == "development") frontUrlAddress = DEV_BACKEND_URL_ADDRESS!;
 else frontUrlAddress = PRO_FRONT_URL_ADDRESS!;
 class AuthenticationController implements Controller {
     public path = "/auth";
-    public router = express.Router();
+    public router: any = express.Router();
     private user = userModel;
     private tmpUser = tmpUserModel;
     private passwordResetToken = passwordResetTokenModel;
@@ -63,6 +66,7 @@ class AuthenticationController implements Controller {
             validate(newPasswordSchema),
             catchError(this.resetPassword)
         );
+        this.router.post(`/changePassword`, authMiddleware, catchError(this.changeUserPassword));
     }
 
     private registerUser = async (
@@ -196,6 +200,27 @@ class AuthenticationController implements Controller {
             { $set: { password: hashedPassword } }
         );
         res.send({ message: "Hasło zostało zresetowane" });
+    };
+
+    private changeUserPassword = async (
+        req: RequestWithUser,
+        res: express.Response,
+        next: express.NextFunction
+    ) => {
+        let { oldPassword, newPassword } = req.body;
+
+        let user = await this.user.findById(req.user.id);
+
+        if (user) {
+            let isPasswordMatching = await bcrypt.compare(oldPassword, user.password);
+            if (isPasswordMatching) {
+                let hashedPassword = await bcrypt.hash(newPassword, 10);
+                await this.user.updateOne({ _id: user.id }, { $set: { password: hashedPassword } });
+                res.send({ message: "Hasło zostało zmienione" });
+            } else {
+                next(new WrongCredentialsException());
+            }
+        }
     };
 }
 
