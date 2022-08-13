@@ -1,8 +1,10 @@
 node_modules
 
 .env
+api.yaml
+myKey.json
 
-dist
+build
 
 src/public
 src/build

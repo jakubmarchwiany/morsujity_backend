@@ -1,30 +1,33 @@
-import * as mongoose from "mongoose";
+import { model, Schema } from "mongoose";
+import IPasswordResetToken from "./passwordResetToken.interface";
 
-import PasswordResetToken from "./passwordResetToken.interface";
-const Schema = mongoose.Schema;
+const { DEV_RESET_PASSWORD_TOKEN_EXPIRE_AFTER, PRO_RESET_PASSWORD_TOKEN_EXPIRE_AFTER } =
+    process.env;
 
 let expireIn;
-if (process.env.ENV == "development") {
-    expireIn = parseInt(process.env.DEV_RESET_PASSWORD_TOKEN_EXPIRE_AFTER!);
-} else expireIn = parseInt(process.env.PRO_RESET_PASSWORD_TOKEN_EXPIRE_AFTER!);
+if (process.env.NODE_ENV == "development")
+    expireIn = parseInt(DEV_RESET_PASSWORD_TOKEN_EXPIRE_AFTER);
+if (process.env.NODE_ENV == "production")
+    expireIn = parseInt(PRO_RESET_PASSWORD_TOKEN_EXPIRE_AFTER);
 
-const passwordResetTokenSchema = new mongoose.Schema<PasswordResetToken>({
+const passwordResetTokenSchema = new Schema<IPasswordResetToken>({
     expireIn: {
         type: Date,
         default: new Date(),
     },
-    token: String,
+    token: { type: String, required: true },
     userId: {
         type: Schema.Types.ObjectId,
         ref: "User",
+        required: true,
     },
 });
 
 passwordResetTokenSchema.index({ expireIn: 1 }, { expireAfterSeconds: expireIn, name: "expireIn" });
 
-const passwordResetTokenModel = mongoose.model<PasswordResetToken>(
-    "passwordResetToken",
+const PasswordResetToken = model<IPasswordResetToken>(
+    "PasswordResetToken",
     passwordResetTokenSchema
 );
 
-export default passwordResetTokenModel;
+export default PasswordResetToken;

@@ -1,4 +1,4 @@
-interface TmpUser {
+interface ITmpUser {
     _id: string;
     email: string;
     password: string;
@@ -6,4 +6,4 @@ interface TmpUser {
     expireIn: Date;
 }
 
-export default TmpUser;
+export default ITmpUser;

@@ -1,5 +1,6 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
-import * as yup from "yup";
+import yup from "yup";
+
 import HttpException from "./exceptions/HttpException";
 
 function validate(schema: yup.AnySchema): RequestHandler {
@@ -12,7 +13,7 @@ function validate(schema: yup.AnySchema): RequestHandler {
             });
             return next();
         } catch (err: any) {
-            return next(new HttpException(500, err.message));
+            return next(new HttpException(400, err.message));
         }
     };
 }

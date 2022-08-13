@@ -1,12 +1,12 @@
 // "use strict";
-import * as fs from "fs";
-import * as handlebars from "handlebars";
-import * as nodemailer from "nodemailer";
-import { Transporter } from "nodemailer";
-import * as smtpTransport from "nodemailer-smtp-transport";
+import fs from "fs";
+import handlebars from "handlebars";
+import nodemailer, { Transporter } from "nodemailer";
+import smtpTransport from "nodemailer-smtp-transport";
+import path from "path";
 
 const {
-    ENV,
+    NODE_ENV,
     SERVER_HOST,
     SERVER_MAIL_PORT,
     SERVER_MAIL_SECURE,
@@ -16,17 +16,15 @@ const {
     PRO_FRONT_URL_ADDRESS,
 } = process.env;
 
+let url: string;
+if (NODE_ENV === "development") url = DEV_FRONT_URL_ADDRESS;
+if (NODE_ENV === "production") url = PRO_FRONT_URL_ADDRESS;
+
 class MailBot {
-    private transporter!: Transporter;
-    private url: string;
+    private transporter: Transporter;
 
     constructor() {
         this.createTransport();
-        if (ENV == "development") {
-            this.url = DEV_FRONT_URL_ADDRESS!;
-        } else {
-            this.url = PRO_FRONT_URL_ADDRESS!;
-        }
     }
 
     private async createTransport() {
@@ -42,62 +40,59 @@ class MailBot {
                     },
                 })
             );
-        } catch (error) {
+        } catch (error: any) {
+            console.log(error.message);
             setTimeout(() => {
                 this.createTransport();
             }, 10000);
         }
     }
-    public sendMailEmailUserVerification = async (targetMail: string, token: string) => {
-        try {
-            let html = fs.readFileSync("./utils/mailMessages/emailVerification.html", "utf8");
-            let template = handlebars.compile(html);
+    public sendMailEmailUserVerification = (targetMail: string, token: string) => {
+        let html = fs.readFileSync(
+            path.resolve(__dirname, "mailMessages/emailVerification.html"),
+            "utf8"
+        );
 
-            let variables = {
-                endPoint: this.url + "/verifyEmail/" + token,
-            };
+        let template = handlebars.compile(html);
 
-            let htmlToSend = template(variables);
+        let variables = {
+            endPoint: url + "/verifyEmail/" + token,
+        };
 
-            let mailOptions = {
-                from: '"Bot morsujity" <bot@morsujity.pl>', // sender address
-                to: targetMail, // list of receivers
-                subject: "Zweryfikuj konto", // Subject line
-                html: htmlToSend, // html body
-            };
+        let htmlToSend = template(variables);
 
-            this.transporter.sendMail(mailOptions);
-        } catch (error: any) {
-            setTimeout(() => {
-                this.sendMailEmailUserVerification(targetMail, token);
-            }, 10000);
-        }
+        let mailOptions = {
+            from: '"Bot morsujity" <morsujity@server032359.nazwa.pl>', // sender address
+            to: targetMail, // list of receivers
+            subject: "Zweryfikuj konto", // Subject line
+            html: htmlToSend, // html body
+        };
+
+        return this.transporter.sendMail(mailOptions);
     };
 
     public sendMailResetUserPassword = async (targetMail: string, token: string) => {
-        try {
-            let html = fs.readFileSync("./utils/mailMessages/passwordReset.html", "utf8");
-            let template = handlebars.compile(html);
+        let html = fs.readFileSync(
+            path.resolve(__dirname, "mailMessages/passwordReset.html"),
+            "utf8"
+        );
 
-            let variables = {
-                endPoint: this.url + "/resetPassword/" + token,
-            };
+        let template = handlebars.compile(html);
 
-            let htmlToSend = template(variables);
+        let variables = {
+            endPoint: url + "/resetPassword/" + token,
+        };
 
-            let mailOptions = {
-                from: '"Bot morsujity" <bot@morsujity.pl>', // sender address
-                to: targetMail, // list of receivers
-                subject: "Zresetuj Hasło", // Subject line
-                html: htmlToSend, // html body
-            };
+        let htmlToSend = template(variables);
 
-            this.transporter.sendMail(mailOptions);
-        } catch (error: any) {
-            setTimeout(() => {
-                this.sendMailEmailUserVerification(targetMail, token);
-            }, 10000);
-        }
+        let mailOptions = {
+            from: '"Bot morsujity" <morsujity@server032359.nazwa.pl>', // sender address
+            to: targetMail, // list of receivers
+            subject: "Zresetuj Hasło", // Subject line
+            html: htmlToSend, // html body
+        };
+
+        return this.transporter.sendMail(mailOptions);
     };
 }
 

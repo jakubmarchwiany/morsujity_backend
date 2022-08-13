@@ -1,21 +1,24 @@
 import { NextFunction, Response } from "express";
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+
 import RequestWithUser from "../interfaces/requestWithUser.interface";
-import AuthenticationTokenMissingException from "../middleware/exceptions/AuthenticationTokenMissingException";
-import WrongAuthenticationTokenException from "../middleware/exceptions/WrongAuthenticationTokenException";
 import DataStoredInToken from "../models/authenticationToken/dataStoredInToken.interface";
 
-async function authMiddleware(request: RequestWithUser, response: Response, next: NextFunction) {
+import AuthenticationTokenMissingException from "../middleware/exceptions/AuthenticationTokenMissingException";
+import WrongAuthenticationTokenException from "../middleware/exceptions/WrongAuthenticationTokenException";
+
+const { JWT_SECRET } = process.env;
+
+function authMiddleware(request: RequestWithUser, response: Response, next: NextFunction) {
     const cookies = request.cookies;
     if (cookies && cookies.Authorization) {
-        const secret = process.env.JWT_SECRET;
         try {
             const verificationResponse = jwt.verify(
                 cookies.Authorization,
-                secret!
+                JWT_SECRET
             ) as DataStoredInToken;
 
-            const user = { id: verificationResponse._id, type: verificationResponse.userType };
+            const user = { _id: verificationResponse._id, userType: verificationResponse.userType };
 
             if (user) {
                 request.user = user;

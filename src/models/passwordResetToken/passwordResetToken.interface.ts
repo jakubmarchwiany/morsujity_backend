@@ -1,9 +1,9 @@
 import { Types } from "mongoose";
 
-interface PasswordResetToken {
+interface IPasswordResetToken {
     expireIn?: Date;
     token: string;
     userId: Types.ObjectId;
 }
 
-export default PasswordResetToken;
+export default IPasswordResetToken;

@@ -20,6 +20,6 @@ const registerUserSchema = yup.object({
     }),
 });
 
-export type registerUserData = yup.InferType<typeof registerUserSchema.fields.body>;
+export type RegisterUserData = yup.InferType<typeof registerUserSchema.fields.body>;
 
 export default registerUserSchema;

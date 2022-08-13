@@ -1,11 +1,12 @@
 {
     "name": "morsujity-backend",
     "version": "1.0.0",
-    "description": "",
-    "main": "src/app.ts",
+    "description": "Api to manage morsujity",
+    "main": "app.js",
     "scripts": {
-        "dev": "ts-node ./src/app.ts",
-        "tsc": "tsc"
+        "start": "node app.js",
+        "start:dev": "nodemon",
+        "build": "rimraf ./build && tsc && cp -r ./src/utils/mailMessages ./build/utils/ && cp package.json package-lock.json myKey.json {.gcloudignore} {.env} api.yaml ./build/"
     },
     "keywords": [],
     "author": "",
@@ -21,17 +22,19 @@
         "@types/nodemailer-smtp-transport": "^2.7.5",
         "@types/sha256": "0.2.0",
         "@types/sharp": "^0.30.4",
+        "@types/uuid": "^8.3.4",
         "@types/yup": "^0.29.14",
         "nodemon": "^2.0.19",
+        "rimraf": "^3.0.2",
         "ts-node": "^10.8.1",
         "typescript": "^4.7.3"
     },
     "dependencies": {
+        "@google-cloud/storage": "^6.4.0",
         "@types/nodemailer-direct-transport": "^1.0.32",
         "bcryptjs": "^2.4.3",
         "cookie-parser": "^1.4.6",
         "cors": "^2.8.5",
-        "crypto": "^1.0.1",
         "dotenv": "^16.0.1",
         "envalid": "^7.3.1",
         "express": "^4.18.1",
@@ -43,6 +46,7 @@
         "nodemailer-smtp-transport": "^2.7.4",
         "sha256": "^0.2.0",
         "sharp": "^0.30.7",
+        "uuid": "^8.3.2",
         "yup": "^0.32.11"
     }
 }
