@@ -1,19 +1,22 @@
-import * as mongoose from "mongoose";
+import { model, Schema } from "mongoose";
 
-import User, { status, type } from "./user.interface";
+import { IUser, IUserMethods, UserModel, UserStatus, UserType } from "./user.interface";
 
-let { DEF_USER_IMAGE } = process.env;
+const { DEF_USER_IMAGE, DEF_USER_IMAGE_PATH } = process.env;
 
-const userSchema = new mongoose.Schema<User>({
-    email: String,
-    password: String,
-    status: { type: String, default: status.ACTIVE },
-    type: { type: String, default: type.USER },
-    pseudonym: String,
+const userSchema = new Schema<IUser, UserModel, IUserMethods>({
+    email: { type: String, required: true },
+    password: { type: String, required: true },
+    status: { type: String, default: UserStatus.ACTIVE },
+    type: { type: String, default: UserType.USER },
+    pseudonym: { type: String, required: true },
     image: { type: String, default: DEF_USER_IMAGE },
     createdIn: { type: Date, default: new Date() },
 });
 
-const userModel = mongoose.model<User>("User", userSchema);
+userSchema.method("imageURL", function imageURL(this: IUser) {
+    return `${DEF_USER_IMAGE_PATH}/${this.image}.webp`;
+});
 
-export default userModel;
+const User = model<IUser, UserModel>("User", userSchema);
+export default User;
