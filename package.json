@@ -6,7 +6,7 @@
     "scripts": {
         "start": "node app.js",
         "start:dev": "nodemon",
-        "build": "rimraf ./build && tsc && cp -r ./src/public/ ./build/ && cp -r ./src/utils/mailMessages ./build/utils/ && cp package.json package-lock.json myKey.json {.gcloudignore} {.env} api.yaml ./build/"
+        "build": "rimraf ./build && tsc && cp -r ./src/utils/mailMessages ./build/utils/ && cp package.json package-lock.json myKey.json {.gcloudignore} {.env} api.yaml ./build/"
     },
     "keywords": [],
     "author": "",
