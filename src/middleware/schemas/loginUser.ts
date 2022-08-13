@@ -4,11 +4,11 @@ const loginUserSchema = yup.object({
     body: yup.object({
         email: yup
             .string()
-            .required("Podano nieprawidłowe dane uwierzytelniające")
+            .required("'email' wymagane")
             .email("Podano nieprawidłowe dane uwierzytelniające"),
         password: yup
             .string()
-            .required("Podano nieprawidłowe dane uwierzytelniające")
+            .required("'password' wymagane")
             .min(8, "Podano nieprawidłowe dane uwierzytelniające")
             .max(20, "Podano nieprawidłowe dane uwierzytelniające")
             .matches(/(?=.*[a-z])/, "Podano nieprawidłowe dane uwierzytelniające")
@@ -18,6 +18,6 @@ const loginUserSchema = yup.object({
     }),
 });
 
-export type loginUserData = yup.InferType<typeof loginUserSchema.fields.body>;
+export type LoginUserData = yup.InferType<typeof loginUserSchema.fields.body>;
 
 export default loginUserSchema;

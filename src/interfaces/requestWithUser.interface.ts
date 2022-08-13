@@ -1,11 +1,7 @@
 import { Request } from "express";
-import User from "../models/user/user.interface";
+import DataStoredInToken from "../models/authenticationToken/dataStoredInToken.interface";
 
 interface RequestWithUser extends Request {
-    user: {
-        id: string;
-        type: string;
-    };
+    user?: DataStoredInToken;
 }
-
 export default RequestWithUser;

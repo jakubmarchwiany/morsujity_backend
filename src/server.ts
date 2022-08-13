@@ -4,8 +4,8 @@ import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 
-import Controller from "./interfaces/controller.interface";
 import errorMiddleware from "./middleware/error.middleware";
+import Controller from "./interfaces/controller.interface";
 import HttpException from "./middleware/exceptions/HttpException";
 
 const {

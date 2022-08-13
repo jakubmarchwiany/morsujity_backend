@@ -1,5 +1,4 @@
-import { Request, Response, NextFunction } from "express";
-import HttpException from "../middleware/exceptions/HttpException";
+import { NextFunction, Request, Response } from "express";
 
 const catchError = (func: Function) => {
     return (req: Request, res: Response, next: NextFunction) => {
