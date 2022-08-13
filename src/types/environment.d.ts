@@ -2,8 +2,8 @@ export {};
 declare global {
     namespace NodeJS {
         interface ProcessEnv {
-            ENV: "development" | "production";
-            SERVER_PORT: string;
+            NODE_ENV: "development" | "production";
+            PORT: string;
             DEV_FRONT_URL_ADDRESS: string;
             DEV_BACKEND_URL_ADDRESS: string;
             PRO_FRONT_URL_ADDRESS: string;

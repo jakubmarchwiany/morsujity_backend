@@ -2,8 +2,8 @@ import { bool, cleanEnv, num, port, str } from "envalid";
 
 function validateEnv() {
     cleanEnv(process.env, {
-        ENV: str({ choices: ["development", "production"] }),
-        SERVER_PORT: port(),
+        NODE_ENV: str({ choices: ["development", "production"] }),
+        PORT: port(),
         DEV_FRONT_URL_ADDRESS: str(),
         DEV_BACKEND_URL_ADDRESS: str(),
         PRO_FRONT_URL_ADDRESS: str(),
