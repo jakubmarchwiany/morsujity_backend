@@ -1,64 +1,76 @@
-import * as express from "express";
-import { Request, Response, NextFunction } from "express";
-import RequestWithUser from "../interfaces/requestWithUser.interface";
-import authMiddleware from "../middleware/auth.middleware";
+import { NextFunction, Response, Router } from "express";
 
-import Controller from "../interfaces/controller.interface";
-import userModel from "../models/user/user.model";
+import authMiddleware from "../middleware/auth.middleware";
+import validate from "../middleware/validate.middleware";
+
 import catchError from "../utils/catchError";
 import ImageBot from "../utils/ImageBot";
 
-let { ENV, DEF_USER_IMAGE_PATH, DEV_BACKEND_URL_ADDRESS, PRO_FRONT_URL_ADDRESS } = process.env;
+import User from "../models/user/user.model";
 
+import RequestWithUser from "../interfaces/requestWithUser.interface";
+import Controller from "../interfaces/controller.interface";
+
+import changePseudonymSchema, { ChangePseudonymData } from "../middleware/schemas/changePseudonym";
+
+import HttpException from "../middleware/exceptions/HttpException";
+
+const { NODE_ENV, DEV_BACKEND_URL_ADDRESS, PRO_FRONT_URL_ADDRESS } = process.env;
 let frontUrlAddress: string;
-if (ENV == "development") frontUrlAddress = DEV_BACKEND_URL_ADDRESS!;
-else frontUrlAddress = PRO_FRONT_URL_ADDRESS!;
+if (NODE_ENV == "development") frontUrlAddress = DEV_BACKEND_URL_ADDRESS;
+if (NODE_ENV == "production") frontUrlAddress = PRO_FRONT_URL_ADDRESS;
 
 class UserController implements Controller {
+    public router = Router();
     public path = "/user";
-    public router: any = express.Router();
-    private user = userModel;
-    private imageBot;
+    private user = User;
+    private imageBot = new ImageBot();
 
     constructor() {
-        this.imageBot = new ImageBot();
         this.initializeRoutes();
     }
 
     private initializeRoutes() {
-        this.router.post(`/getData`, authMiddleware, catchError(this.getUserData));
+        this.router.post(`/get-data`, authMiddleware, catchError(this.getUserData));
         this.router.post(
-            `/newImage`,
+            `/change-pseudonym`,
+            validate(changePseudonymSchema),
             authMiddleware,
-            this.imageBot.upload.single("userImage"),
-            catchError(this.newImage)
+            catchError(this.changeUserPseudonym)
         );
-        this.router.post(`/changePseudonym`, authMiddleware, catchError(this.changeUserPseudonym));
+        this.router.post(
+            `/change-image`,
+            authMiddleware,
+            this.imageBot.multer.single("userImage"),
+            catchError(this.changeImage)
+        );
     }
 
-    private getUserData = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-        let user = await this.user.findById(req.user.id, { password: 0 });
-        user!.image = `${frontUrlAddress}/${DEF_USER_IMAGE_PATH}/${user!.image}`;
-        res.send({ user: user });
+    private getUserData = async (req: RequestWithUser, res: Response) => {
+        let user = await this.user.findById(req.user._id, { password: 0 });
+        user.image = user.imageURL();
+        res.send({ user });
     };
 
     private changeUserPseudonym = async (req: RequestWithUser, res: Response) => {
-        await this.user.findByIdAndUpdate(req.user.id, { pseudonym: req.body.pseudonym });
+        const { pseudonym }: ChangePseudonymData = req.body;
+        await this.user.findByIdAndUpdate(req.user._id, { pseudonym });
         res.send({ message: "Udało się zaktualizować ksywkę" });
     };
 
-    private newImage = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-        let fileName = await this.imageBot.saveNewUserImage(req.file);
-
-        let user = await this.user.findById(req.user.id, { image: 1 });
-
-        if (user!.image !== "def.webp") {
-            this.imageBot.deleteUserImage(user!.image);
+    private changeImage = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+        try {
+            const fileName = await this.imageBot.saveNewUserImage(req.file);
+            let user = await this.user.findById(req.user._id, { image: 1 });
+            if (user.image !== "def") {
+                await this.imageBot.deleteUserImage(user.image + ".webp");
+            }
+            user.image = fileName;
+            await user.save();
+            res.send({ message: "Udało się zaktualizować zdjęcie" });
+        } catch (error: any) {
+            next(new HttpException(500, error.message));
         }
-
-        await this.user.findByIdAndUpdate(req.user.id, { image: fileName });
-
-        res.send({ status: "success" });
     };
 }
 
