@@ -25,6 +25,8 @@ declare global {
             PRO_RESET_PASSWORD_TOKEN_EXPIRE_AFTER: string;
             DEF_USER_IMAGE: string;
             DEF_USER_IMAGE_PATH: string;
+            GCLOUD_STORAGE_IMAGE_BUCKET: string;
+            PROJECT_ID: string;
         }
     }
 }

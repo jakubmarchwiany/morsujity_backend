@@ -25,6 +25,8 @@ function validateEnv() {
         PRO_RESET_PASSWORD_TOKEN_EXPIRE_AFTER: str(),
         DEF_USER_IMAGE: str(),
         DEF_USER_IMAGE_PATH: str(),
+        GCLOUD_STORAGE_IMAGE_BUCKET: str(),
+        PROJECT_ID: str(),
     });
 }
 
