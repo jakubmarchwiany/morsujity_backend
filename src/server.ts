@@ -4,9 +4,9 @@ import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 
-import errorMiddleware from "./middleware/error.middleware";
-import Controller from "./interfaces/controller.interface";
-import HttpException from "./middleware/exceptions/HttpException";
+import errorMiddleware from "./middleware/error-middleware";
+import Controller from "./interfaces/controller-interface";
+import HttpException from "./middleware/exceptions/http-exception";
 
 const {
     NODE_ENV,
@@ -18,11 +18,13 @@ const {
     PRO_WHITELISTED_DOMAINS,
 } = process.env;
 
-let whitelist: any;
-if (NODE_ENV == "development")
-    whitelist = DEV_WHITELISTED_DOMAINS ? DEV_WHITELISTED_DOMAINS.split(",") : [];
-if (NODE_ENV == "production")
-    whitelist = PRO_WHITELISTED_DOMAINS ? PRO_WHITELISTED_DOMAINS.split(",") : [];
+const WHITELIST = (() => {
+    if (NODE_ENV === "development") {
+        return DEV_WHITELISTED_DOMAINS ? DEV_WHITELISTED_DOMAINS.split(",") : [];
+    } else {
+        return PRO_WHITELISTED_DOMAINS ? PRO_WHITELISTED_DOMAINS.split(",") : [];
+    }
+})();
 
 class Server {
     public app: express.Application;
@@ -37,12 +39,11 @@ class Server {
     }
 
     private connectToTheDatabase() {
-        if (NODE_ENV == "development") mongoose.connect(`${DEV_MONGO_PATH}`);
-
-        if (NODE_ENV == "production")
-            mongoose.connect(
-                `mongodb+srv://${PRO_MONGO_USER}:${PRO_MONGO_PASSWORD}@${PRO_MONGO_PATH}`
-            );
+        NODE_ENV === "development"
+            ? mongoose.connect(DEV_MONGO_PATH)
+            : mongoose.connect(
+                  `mongodb+srv://${PRO_MONGO_USER}:${PRO_MONGO_PASSWORD}@${PRO_MONGO_PATH}`
+              );
 
         const db = mongoose.connection;
         db.on("error", () => {
@@ -61,7 +62,7 @@ class Server {
     private initializeCors() {
         const corsOptions = {
             origin: function (origin: any, callback: any) {
-                if (!origin || whitelist.indexOf(origin) !== -1) {
+                if (!origin || WHITELIST.indexOf(origin) !== -1) {
                     callback(null, true);
                 } else {
                     callback(new Error("Not allowed by CORS"));
@@ -91,5 +92,4 @@ class Server {
         });
     }
 }
-
 export default Server;
