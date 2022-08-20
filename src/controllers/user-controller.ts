@@ -8,8 +8,8 @@ import ImageBot from "../utils/image-bot";
 
 import User from "../models/user/user-model";
 
-import RequestWithUser from "../interfaces/request-with-user-interface";
 import Controller from "../interfaces/controller-interface";
+import RequestWithUser from "../interfaces/request-with-user-interface";
 
 import changePseudonymSchema, {
     ChangePseudonymData,
@@ -39,7 +39,12 @@ class UserController implements Controller {
             `/change-image`,
             authMiddleware,
             this.imageBot.multer.single("userImage"),
-            catchError(this.changeImage)
+            catchError(this.changeUserImage)
+        );
+        this.router.get(
+            `/change-user-image-to-def`,
+            authMiddleware,
+            catchError(this.changeUserImageToDef)
         );
     }
 
@@ -55,19 +60,25 @@ class UserController implements Controller {
         res.send({ message: "Udało się zaktualizować ksywkę" });
     };
 
-    private changeImage = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-        try {
-            const fileName = await this.imageBot.saveNewUserImage(req.file);
-            let user = await this.user.findById(req.user._id, { image: 1 });
-            if (user.image !== "def") {
-                await this.imageBot.deleteUserImage(user.image + ".webp");
-            }
-            user.image = fileName;
-            await user.save();
-            res.send({ message: "Udało się zaktualizować zdjęcie" });
-        } catch (error: any) {
-            next(new HttpException(500, error.message));
+    private changeUserImage = async (req: RequestWithUser, res: Response) => {
+        const fileName = await this.imageBot.saveNewUserImage(req.file);
+        let user = await this.user.findById(req.user._id, { image: 1 });
+        if (user.image !== "def") {
+            await this.imageBot.deleteUserImage(user.image + ".webp");
         }
+        user.image = fileName;
+        await user.save();
+        res.send({ message: "Udało się zaktualizować zdjęcie", image: user.imageURL() });
+    };
+
+    private changeUserImageToDef = async (req: RequestWithUser, res: Response) => {
+        let user = await this.user.findById(req.user._id, { image: 1 });
+
+        await this.imageBot.deleteUserImage(user.image + ".webp");
+
+        user.image = "def";
+        await user.save();
+        res.send({ message: "Udało ustawić domyślne zdjęcie", image: user.imageURL() });
     };
 }
 export default UserController;
