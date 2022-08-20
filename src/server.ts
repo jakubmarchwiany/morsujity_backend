@@ -4,8 +4,8 @@ import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 
-import errorMiddleware from "./middleware/error-middleware";
 import Controller from "./interfaces/controller-interface";
+import errorMiddleware from "./middleware/error-middleware";
 import HttpException from "./middleware/exceptions/http-exception";
 
 const {
@@ -32,8 +32,8 @@ class Server {
     constructor(controllers: Controller[]) {
         this.app = express();
         this.connectToTheDatabase();
-        this.initializeMiddlewares();
         this.initializeCors();
+        this.initializeMiddlewares();
         this.initializeControllers(controllers);
         this.initializeErrorHandling();
     }
