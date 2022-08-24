@@ -1,9 +1,8 @@
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
-import cors from "cors";
+import cors, { CorsOptions } from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
-
 import Controller from "./interfaces/controller-interface";
 import errorMiddleware from "./middleware/error-middleware";
 import HttpException from "./middleware/exceptions/http-exception";
@@ -11,12 +10,12 @@ import HttpException from "./middleware/exceptions/http-exception";
 const {
     NODE_ENV,
     DEV_MONGO_PATH,
-    PRO_MONGO_USER,
-    PRO_MONGO_PASSWORD,
     PRO_MONGO_PATH,
     DEV_WHITELISTED_DOMAINS,
     PRO_WHITELISTED_DOMAINS,
 } = process.env;
+
+const MONGO_PATH = NODE_ENV === "development" ? DEV_MONGO_PATH : PRO_MONGO_PATH;
 
 const WHITELIST = (() => {
     if (NODE_ENV === "development") {
@@ -39,30 +38,26 @@ class Server {
     }
 
     private connectToTheDatabase() {
-        NODE_ENV === "development"
-            ? mongoose.connect(DEV_MONGO_PATH)
-            : mongoose.connect(
-                  `mongodb+srv://${PRO_MONGO_USER}:${PRO_MONGO_PASSWORD}@${PRO_MONGO_PATH}`
-              );
-
-        const db = mongoose.connection;
-        db.on("error", () => {
-            console.log("Database error connecting");
-        });
-        db.once("open", () => {
-            console.log("Database connected");
-        });
+        mongoose
+            .connect(MONGO_PATH)
+            .then(() => {
+                console.log("Connected to the database");
+            })
+            .catch(() => {
+                console.log("Error connecting to the database");
+            });
     }
 
     private initializeMiddlewares() {
-        this.app.use(bodyParser.json());
+        this.app.use(bodyParser.json({ limit: "10mb" }));
+        this.app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
         this.app.use(cookieParser());
     }
 
     private initializeCors() {
-        const corsOptions = {
-            origin: function (origin: any, callback: any) {
-                if (!origin || WHITELIST.indexOf(origin) !== -1) {
+        const corsOptions: CorsOptions = {
+            origin: function (origin, callback) {
+                if (WHITELIST.indexOf(origin) !== -1 || !origin) {
                     callback(null, true);
                 } else {
                     callback(new Error("Not allowed by CORS"));

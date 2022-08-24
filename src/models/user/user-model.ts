@@ -1,5 +1,4 @@
 import { model, Schema } from "mongoose";
-
 import { IUser, IUserMethods, UserModel, UserStatus, UserType } from "./user-interface";
 
 const { DEF_USER_IMAGE, DEF_USER_IMAGE_PATH } = process.env;

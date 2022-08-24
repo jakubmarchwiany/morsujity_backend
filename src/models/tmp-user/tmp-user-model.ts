@@ -1,5 +1,4 @@
 import { model, Schema } from "mongoose";
-
 import ITmpUser from "./tmp-user-interface";
 
 const { NODE_ENV, DEV_USER_EXPIRE_AFTER, PRO_USER_EXPIRE_AFTER } = process.env;

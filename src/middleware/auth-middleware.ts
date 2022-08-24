@@ -14,11 +14,15 @@ function authMiddleware(request: RequestWithUser, response: Response, next: Next
     if (cookies && cookies.Authorization) {
         try {
             const verificationResponse = jwt.verify(
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                 cookies.Authorization,
-                JWT_SECRET
+                JWT_SECRET,
             ) as DataStoredInToken;
 
-            const user = { _id: verificationResponse._id, userType: verificationResponse.userType };
+            const user = {
+                _id: verificationResponse._id,
+                userType: verificationResponse.userType,
+            };
 
             if (user) {
                 request.user = user;

@@ -11,17 +11,17 @@ export enum UserType {
 }
 
 export interface IUserMethods {
-    imageURL(): string;
+    imageURL: () => string;
 }
 
 export interface IUser {
     _id: string;
     email: string;
-    password: string;
+    password: string | undefined;
     status: UserStatus;
     type: UserType;
     pseudonym: string;
     image: string;
     createdIn: Date;
 }
-export type UserModel = Model<IUser, {}, IUserMethods>;
+export type UserModel = Model<IUser, unknown, IUserMethods>;

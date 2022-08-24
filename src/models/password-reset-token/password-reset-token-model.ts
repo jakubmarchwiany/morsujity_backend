@@ -26,6 +26,6 @@ passwordResetTokenSchema.index({ expireIn: 1 }, { expireAfterSeconds: expireIn, 
 
 const PasswordResetToken = model<IPasswordResetToken>(
     "PasswordResetToken",
-    passwordResetTokenSchema
+    passwordResetTokenSchema,
 );
 export default PasswordResetToken;
