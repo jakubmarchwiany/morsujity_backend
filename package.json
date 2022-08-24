@@ -6,7 +6,10 @@
     "scripts": {
         "start": "node app.js",
         "start:dev": "nodemon",
-        "build": "rimraf ./build && tsc && cp -r ./src/utils/mail-messages ./build/utils/ && cp package.json package-lock.json myKey.json {.gcloudignore} {.env} api.yaml ./build/"
+        "build": "rimraf ./build && tsc && cp -r ./src/utils/mail-messages ./build/utils/ && cp package.json package-lock.json myKey.json {.gcloudignore} {.env} api.yaml ./build/",
+        "lint": "eslint src/**/*.{js,jsx,ts,tsx,json}",
+        "lint:fix": "eslint --fix src/**/*.{js,jsx,ts,tsx,json}",
+        "format": "prettier --write src/**/*.{js,jsx,ts,tsx,css,md,json} --config ./.prettierrc"
     },
     "keywords": [],
     "author": "",
@@ -24,6 +27,11 @@
         "@types/sharp": "^0.30.5",
         "@types/uuid": "^8.3.4",
         "@types/yup": "^0.29.14",
+        "@typescript-eslint/eslint-plugin": "5.33.0",
+        "@typescript-eslint/parser": "^5.34.0",
+        "eslint-config-prettier": "^8.5.0",
+        "eslint-plugin-prettier": "^4.2.1",
+        "eslint": "^8.22.0",
         "nodemon": "^2.0.19",
         "rimraf": "^3.0.2",
         "ts-node": "^10.9.1",

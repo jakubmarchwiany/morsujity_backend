@@ -8,8 +8,10 @@
         "outDir": "build",
 
         "strict": true,
+        "noImplicitAny": true,
         "esModuleInterop": true,
         "skipLibCheck": true,
+        "resolveJsonModule": true,
         "forceConsistentCasingInFileNames": true,
         "moduleResolution": "node",
         "strictNullChecks": false
