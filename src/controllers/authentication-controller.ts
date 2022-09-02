@@ -124,7 +124,7 @@ class AuthenticationController implements Controller {
         if (user !== null) {
             const isPasswordMatching = await bcrypt.compare(logInData.password, user.password);
             if (isPasswordMatching) {
-                user.image = user.imageURL();
+                if (user.image !== "def") user.image = user.imageURL();
                 user.password = undefined;
                 const tokenData = this.createAuthenticationToken(user);
                 res.setHeader("Set-Cookie", [this.createCookie(tokenData)]);

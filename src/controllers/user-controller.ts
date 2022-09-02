@@ -43,7 +43,7 @@ class UserController implements Controller {
 
     private readonly getUserData = async (req: RequestWithUser, res: Response) => {
         const user = await this.user.findById(req.user._id, { password: 0 });
-        user.image = user.imageURL();
+        if (user.image !== "def") user.image = user.imageURL();
         res.send({ user, message: "Udało się autoryzować użytkownika" });
     };
 
@@ -76,7 +76,7 @@ class UserController implements Controller {
         await user.save();
         res.send({
             message: "Udało ustawić domyślne zdjęcie",
-            image: user.imageURL(),
+            image: user.image,
         });
     };
 }
