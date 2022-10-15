@@ -31,6 +31,8 @@ import MailBot from "../utils/mail-bot";
 
 const { JWT_SECRET } = process.env;
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 class AuthenticationController implements Controller {
     public router = Router();
     public path = "/auth";
@@ -44,13 +46,14 @@ class AuthenticationController implements Controller {
     }
 
     private initializeRoutes() {
+        this.router.get(`/auto-login`, authMiddleware, catchError(this.autoLogin));
+        this.router.post(`/login`, validate(loginUserSchema), catchError(this.loggingIn));
         this.router.post(`/register`, validate(registerUserSchema), catchError(this.registerUser));
         this.router.post(
             `/verify-user-email`,
             validate(emailTokenSchema),
             catchError(this.verifyUserEmail),
         );
-        this.router.post(`/login`, validate(loginUserSchema), catchError(this.loggingIn));
         this.router.post(`/logout`, this.logOut);
         this.router.post(
             `/request-reset-password`,
@@ -76,6 +79,7 @@ class AuthenticationController implements Controller {
         next: NextFunction,
     ) => {
         const userData = req.body;
+        await sleep(1500);
         if (await this.user.findOne({ email: userData.email })) {
             next(new UserWithThatEmailAlreadyExistsException(userData.email));
         } else {
@@ -121,6 +125,7 @@ class AuthenticationController implements Controller {
     ) => {
         const logInData = req.body;
         const user = await this.user.findOne({ email: logInData.email }, { status: 0 });
+        await sleep(1500);
         if (user !== null) {
             const isPasswordMatching = await bcrypt.compare(logInData.password, user.password);
             if (isPasswordMatching) {
@@ -144,6 +149,12 @@ class AuthenticationController implements Controller {
                 ),
             );
         }
+    };
+
+    private autoLogin = async (req: Request, res: Response) => {
+        res.send({
+            message: "Autoryzacja przebiegła pomyślnie",
+        });
     };
 
     private createAuthenticationToken(user: IUser): TokenData {

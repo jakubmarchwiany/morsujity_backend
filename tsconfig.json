@@ -16,6 +16,9 @@
         "moduleResolution": "node",
         "strictNullChecks": false
     },
+    "ts-node": {
+        "swc": true
+    },
     "include": ["src/**/*"],
     "exclude": ["src/**/*.spec.ts"]
 }
