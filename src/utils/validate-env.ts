@@ -23,6 +23,10 @@ function validateEnv() {
         SERVER_MAIL_USER: str(),
         SERVER_MAIL_PASS: str(),
 
+        AWS_SENDER_ADDRESS: str(),
+        AWS_ACCESS_KEY_ID: str(),
+        AWS_ACCESS_KEY: str(),
+
         DEV_USER_EXPIRE_AFTER: num(),
         PRO_USER_EXPIRE_AFTER: num(),
 

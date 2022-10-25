@@ -56,14 +56,14 @@ class AuthenticationController implements Controller {
         );
         this.router.post(`/logout`, this.logOut);
         this.router.post(
-            `/request-reset-password`,
+            `/reset-password`,
             validate(emailSchema),
-            catchError(this.requestResetPassword),
+            catchError(this.resetPassword),
         );
         this.router.post(
-            `/reset-password`,
+            `/new-password`,
             validate(resetPasswordSchema),
-            catchError(this.resetPassword),
+            catchError(this.newPassword),
         );
         this.router.post(
             `/change-password`,
@@ -132,7 +132,10 @@ class AuthenticationController implements Controller {
                 if (user.image !== "def") user.image = user.imageURL();
                 user.password = undefined;
                 const tokenData = this.createAuthenticationToken(user);
-                res.setHeader("Set-Cookie", [this.createCookie(tokenData)]);
+                res.cookie("Authorization", tokenData.token, {
+                    maxAge: tokenData.expiresIn * 1000,
+                    path: "/",
+                });
                 res.send({
                     user: user,
                     token: tokenData.token,
@@ -169,16 +172,16 @@ class AuthenticationController implements Controller {
         };
     }
 
-    private createCookie(tokenData: TokenData) {
-        return `Authorization=${tokenData.token}; Max-Age=${tokenData.expiresIn}; path=/;`;
-    }
+    // private createCookie(tokenData: TokenData) {
+    //     return `Authorization=${tokenData.token}; Max-Age=${tokenData.expiresIn}; path=/;`;
+    // }
 
     private readonly logOut = (req: Request, res: Response) => {
         res.setHeader("Set-Cookie", ["Authorization=; Max-Age=0; path=/;"]);
         res.send({ message: "Udało się wylogować" });
     };
 
-    private readonly requestResetPassword = async (
+    private readonly resetPassword = async (
         req: Request<never, never, EmailData>,
         res: Response,
     ) => {
@@ -194,7 +197,7 @@ class AuthenticationController implements Controller {
         res.send({ message: "Email resetujący hasło został wysłany" });
     };
 
-    private readonly resetPassword = async (
+    private readonly newPassword = async (
         req: Request<never, never, NewPasswordData>,
         res: Response,
         next: NextFunction,

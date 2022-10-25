@@ -70,7 +70,7 @@ class Server {
 
     private initializeControllers(controllers: Controller[]) {
         controllers.forEach((controller) => {
-            this.app.use("/api" + controller.path, controller.router);
+            this.app.use(controller.path, controller.router);
         });
         this.app.use("*", (req: Request, res: Response, next: NextFunction) => {
             next(new HttpException(404, "Not found"));

@@ -23,6 +23,10 @@ declare global {
             SERVER_MAIL_USER: string;
             SERVER_MAIL_PASS: string;
 
+            AWS_SENDER_ADDRESS: string;
+            AWS_ACCESS_KEY_ID: string;
+            AWS_ACCESS_KEY: string;
+
             DEV_USER_EXPIRE_AFTER: string;
             PRO_USER_EXPIRE_AFTER: string;
 
