@@ -55,11 +55,7 @@ class AuthenticationController implements Controller {
             catchError(this.verifyUserEmail),
         );
         this.router.post(`/logout`, this.logOut);
-        this.router.post(
-            `/reset-password`,
-            validate(emailSchema),
-            catchError(this.resetPassword),
-        );
+        this.router.post(`/reset-password`, validate(emailSchema), catchError(this.resetPassword));
         this.router.post(
             `/new-password`,
             validate(resetPasswordSchema),
@@ -132,10 +128,11 @@ class AuthenticationController implements Controller {
                 if (user.image !== "def") user.image = user.imageURL();
                 user.password = undefined;
                 const tokenData = this.createAuthenticationToken(user);
-                res.cookie("Authorization", tokenData.token, {
-                    maxAge: tokenData.expiresIn * 1000,
-                    path: "/",
-                });
+                // res.cookie("Authorization", tokenData.token, {
+                //     maxAge: tokenData.expiresIn * 1000,
+                //     path: "/",
+                // });
+
                 res.send({
                     user: user,
                     token: tokenData.token,

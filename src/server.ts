@@ -17,6 +17,10 @@ const {
 
 const MONGO_PATH = NODE_ENV === "development" ? DEV_MONGO_PATH : PRO_MONGO_PATH;
 
+import fs from "fs";
+import http from "http";
+import https from "https";
+
 const WHITELIST = (() => {
     if (NODE_ENV === "development") {
         return DEV_WHITELISTED_DOMAINS ? DEV_WHITELISTED_DOMAINS.split(",") : [];
@@ -82,9 +86,27 @@ class Server {
     }
 
     public listen() {
-        this.app.listen(process.env.PORT || 8080, () => {
-            console.log(`Server listening on the port ${process.env.PORT || 8080}`);
-        });
+        if (NODE_ENV === "development") {
+            http.createServer(this.app).listen(8080, function () {
+                console.log("Example app listening on port 8000!");
+            });
+        } else {
+            http.createServer(this.app).listen(8000, function () {
+                console.log("Example app listening on port 8000!");
+            });
+            https
+                .createServer(
+                    {
+                        ca: fs.readFileSync("ca_bundle.crt"),
+                        key: fs.readFileSync("private.key"),
+                        cert: fs.readFileSync("certificate.crt"),
+                    },
+                    this.app,
+                )
+                .listen(8443, function () {
+                    console.log("Example app listening on port 8443!");
+                });
+        }
     }
 }
 export default Server;

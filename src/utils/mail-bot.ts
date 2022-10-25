@@ -3,7 +3,6 @@ import handlebars from "handlebars";
 import nodemailer, { Transporter } from "nodemailer";
 import smtpTransport from "nodemailer-smtp-transport";
 import path from "path";
-import aws from "aws-sdk";
 
 const {
     NODE_ENV,
@@ -17,13 +16,13 @@ const {
 const FRONT_URL_ADDRESS =
     NODE_ENV === "development" ? DEV_FRONT_URL_ADDRESS : PRO_FRONT_URL_ADDRESS;
 
-const { AWS_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_SENDER_ADDRESS } = process.env;
+// const { AWS_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_SENDER_ADDRESS } = process.env;
 
-aws.config.update({
-    accessKeyId: AWS_ACCESS_KEY_ID,
-    secretAccessKey: AWS_ACCESS_KEY,
-    region: "eu-central-1",
-});
+// aws.config.update({
+//     accessKeyId: AWS_ACCESS_KEY_ID,
+//     secretAccessKey: AWS_ACCESS_KEY,
+//     region: "eu-central-1",
+// });
 
 class MailBot {
     private transporter!: Transporter;
@@ -34,23 +33,23 @@ class MailBot {
 
     private createTransport() {
         try {
-            // this.transporter = nodemailer.createTransport(
-            //     smtpTransport({
-            //         host: SERVER_MAIL_HOST,
-            //         port: 465,
-            //         secure: true,
-            //         auth: {
-            //             user: SERVER_MAIL_USER,
-            //             pass: SERVER_MAIL_PASS,
-            //         },
-            //     }),
-            // );
-
-            this.transporter = nodemailer.createTransport({
-                SES: new aws.SES({
-                    apiVersion: "2010-12-01",
+            this.transporter = nodemailer.createTransport(
+                smtpTransport({
+                    host: SERVER_MAIL_HOST,
+                    port: 465,
+                    secure: true,
+                    auth: {
+                        user: SERVER_MAIL_USER,
+                        pass: SERVER_MAIL_PASS,
+                    },
                 }),
-            });
+            );
+
+            // this.transporter = nodemailer.createTransport({
+            //     SES: new aws.SES({
+            //         apiVersion: "2010-12-01",
+            //     }),
+            // });
         } catch (e) {
             setTimeout(() => {
                 this.createTransport();
@@ -69,7 +68,8 @@ class MailBot {
         const htmlToSend = template(variables);
 
         const mailOptions = {
-            from: `"Bot morsujity" <${AWS_SENDER_ADDRESS}>`, // sender address
+            from: '"Bot morsujity" <morsujity@server032359.nazwa.pl>', // sender address
+            // from: `"Bot morsujity" <${AWS_SENDER_ADDRESS}>`, // sender address
             to: targetMail, // list of receivers
             subject: "Zweryfikuj konto", // Subject line
             html: htmlToSend, // html body
@@ -90,7 +90,9 @@ class MailBot {
         const htmlToSend = template(variables);
 
         const mailOptions = {
-            from: `"Bot morsujity" <${AWS_SENDER_ADDRESS}>`, // sender address
+            from: '"Bot morsujity" <morsujity@server032359.nazwa.pl>', // sender address
+
+            // from: `"Bot morsujity" <${AWS_SENDER_ADDRESS}>`, // sender address
             to: targetMail, // list of receivers
             subject: "Zresetuj Hasło", // Subject line
             html: htmlToSend, // html body
