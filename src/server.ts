@@ -21,7 +21,7 @@ class Server {
 
     constructor(controllers: Controller[]) {
         this.app = express();
-        this.app.use(fakeLoading);
+        //this.app.use(fakeLoading);
         this.connectToTheDatabase();
         this.initializeCors();
         this.initializeMiddlewares();

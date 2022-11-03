@@ -34,6 +34,8 @@ import MailBot from "../utils/mail-bot";
 
 const { JWT_SECRET, AUTHENTICATION_TOKEN_EXPIRE_AFTER } = process.env;
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 class AuthenticationController implements Controller {
     public router = Router();
     public path = "/auth";
@@ -120,6 +122,7 @@ class AuthenticationController implements Controller {
     ) => {
         const logInData = req.body;
         const user = await this.user.findOne({ email: logInData.email }, { status: 0 });
+        await sleep(1500);
         if (user !== null) {
             const isPasswordMatching = await bcrypt.compare(logInData.password, user.password);
 

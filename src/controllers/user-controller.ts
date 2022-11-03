@@ -62,7 +62,6 @@ class UserController implements Controller {
 
     private readonly getUserData = async (req: RequestWithUser<never>, res: Response) => {
         const user = await this.user.findById(req.user._id, { password: 0 });
-
         res.send({ user, message: "Udało się autoryzować użytkownika" });
     };
 
