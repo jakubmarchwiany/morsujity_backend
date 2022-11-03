@@ -1,37 +1,45 @@
 import { cleanEnv, num, port, str } from "envalid";
 
+import dotenv from "dotenv";
+import { number } from "yup";
+dotenv.config();
+
 function validateEnv() {
     cleanEnv(process.env, {
+        PORT: port(),
         NODE_ENV: str({ choices: ["development", "production"] }),
 
-        PORT: port(),
-        PROJECT_ID: str(),
-        KEY_FILE_NAME: str(),
+        // frontend url address
+        FRONT_URL_ADDRESS: str(),
 
-        DEV_FRONT_URL_ADDRESS: str(),
-        PRO_FRONT_URL_ADDRESS: str(),
+        // CORS Options
+        WHITELISTED_DOMAINS: str(),
 
-        DEV_WHITELISTED_DOMAINS: str(),
-        PRO_WHITELISTED_DOMAINS: str(),
+        // MongoDB configuration
+        MONGO_URL: str(),
 
-        DEV_MONGO_PATH: str(),
-        PRO_MONGO_PATH: str(),
-
+        // Authentication configuration
         JWT_SECRET: str(),
 
-        SERVER_MAIL_HOST: str(),
-        SERVER_MAIL_USER: str(),
-        SERVER_MAIL_PASS: str(),
+        // E-mail bot configuration
+        MAIL_HOST: str(),
+        MAIL_PORT: port(),
+        MAIL_USER: str(),
+        MAIL_PASS: str(),
+        MAIL_FROM: str(),
 
-        DEV_USER_EXPIRE_AFTER: num(),
-        PRO_USER_EXPIRE_AFTER: num(),
+        // Variables USER
+        USER_EXPIRE_AFTER: num(),
+        AUTHENTICATION_TOKEN_EXPIRE_AFTER: num(),
 
+        // ResetPasswordToken
+        RESET_PASSWORD_TOKEN_EXPIRE_AFTER: str(),
+
+        // Google console configuration
+        PROJECT_ID: str(),
+        KEY_FILE_NAME: str(),
         GCLOUD_STORAGE_IMAGE_BUCKET: str(),
         DEF_USER_IMAGE: str(),
-        DEF_USER_IMAGE_PATH: str(),
-
-        DEV_RESET_PASSWORD_TOKEN_EXPIRE_AFTER: str(),
-        PRO_RESET_PASSWORD_TOKEN_EXPIRE_AFTER: str(),
     });
 }
 export default validateEnv;

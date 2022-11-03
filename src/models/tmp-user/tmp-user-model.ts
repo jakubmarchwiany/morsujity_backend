@@ -1,10 +1,7 @@
 import { model, Schema } from "mongoose";
 import ITmpUser from "./tmp-user-interface";
 
-const { NODE_ENV, DEV_USER_EXPIRE_AFTER, PRO_USER_EXPIRE_AFTER } = process.env;
-
-const expireIn =
-    NODE_ENV === "development" ? parseInt(DEV_USER_EXPIRE_AFTER) : parseInt(PRO_USER_EXPIRE_AFTER);
+const { USER_EXPIRE_AFTER } = process.env;
 
 const tmpUserSchema = new Schema<ITmpUser>({
     email: { type: String, required: true },
@@ -13,7 +10,10 @@ const tmpUserSchema = new Schema<ITmpUser>({
     expireIn: { type: Date, default: new Date() },
 });
 
-tmpUserSchema.index({ expireIn: 1 }, { expireAfterSeconds: expireIn, name: "expireIn" });
+tmpUserSchema.index(
+    { expireIn: 1 },
+    { expireAfterSeconds: parseInt(USER_EXPIRE_AFTER), name: "expireIn" }
+);
 
 const TmpUser = model<ITmpUser>("TmpUser", tmpUserSchema);
 export default TmpUser;

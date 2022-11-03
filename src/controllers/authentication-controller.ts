@@ -20,22 +20,26 @@ import loginUserSchema, { LoginUserData } from "../middleware/schemas/login-user
 import registerUserSchema, { RegisterUserData } from "../middleware/schemas/register-user-schema";
 import resetPasswordSchema, { NewPasswordData } from "../middleware/schemas/reset-password-schema";
 import validate from "../middleware/validate-middleware";
-import DataStoredInToken from "../models/authentication-token/data-stored-in-token-interface";
-import TokenData from "../models/authentication-token/token-data-interface";
-import PasswordResetToken from "../models/password-reset-token/password-reset-token-model";
 import TmpUser from "../models/tmp-user/tmp-user-model";
+import AuthenticationToken from "../models/tokens/authentication-token/authentication-token";
+import {
+    DataStoredInToken,
+    TokenData,
+} from "../models/tokens/authentication-token/authentication-token-interface";
+import PasswordResetToken from "../models/tokens/password-reset-token/password-reset-token-model";
 import { IUser } from "../models/user/user-interface";
 import User from "../models/user/user-model";
 import catchError from "../utils/catch-error";
 import MailBot from "../utils/mail-bot";
 
-const { JWT_SECRET } = process.env;
+const { JWT_SECRET, AUTHENTICATION_TOKEN_EXPIRE_AFTER } = process.env;
 
 class AuthenticationController implements Controller {
     public router = Router();
     public path = "/auth";
     private readonly user = User;
     private readonly tmpUser = TmpUser;
+    private readonly authenticationToken = AuthenticationToken;
     private readonly passwordResetToken = PasswordResetToken;
     private readonly mailBot = new MailBot();
 
@@ -44,40 +48,36 @@ class AuthenticationController implements Controller {
     }
 
     private initializeRoutes() {
+        this.router.get(`/auto-login`, authMiddleware, catchError(this.autoLogin));
+        this.router.post(`/login`, validate(loginUserSchema), catchError(this.loggingIn));
+        this.router.get(`/logout`, authMiddleware, this.logOut);
         this.router.post(`/register`, validate(registerUserSchema), catchError(this.registerUser));
         this.router.post(
             `/verify-user-email`,
             validate(emailTokenSchema),
-            catchError(this.verifyUserEmail),
+            catchError(this.verifyUserEmail)
         );
-        this.router.post(`/login`, validate(loginUserSchema), catchError(this.loggingIn));
-        this.router.post(`/logout`, this.logOut);
+        this.router.post(`/reset-password`, validate(emailSchema), catchError(this.resetPassword));
         this.router.post(
-            `/request-reset-password`,
-            validate(emailSchema),
-            catchError(this.requestResetPassword),
-        );
-        this.router.post(
-            `/reset-password`,
+            `/new-password`,
             validate(resetPasswordSchema),
-            catchError(this.resetPassword),
+            catchError(this.newPassword)
         );
         this.router.post(
             `/change-password`,
             authMiddleware,
             validate(changePasswordSchema),
-            catchError(this.changeUserPassword),
+            catchError(this.changeUserPassword)
         );
     }
 
     private readonly registerUser = async (
         req: Request<never, never, RegisterUserData>,
-        res: Response,
-        next: NextFunction,
+        res: Response
     ) => {
         const userData = req.body;
-        if (await this.user.findOne({ email: userData.email })) {
-            next(new UserWithThatEmailAlreadyExistsException(userData.email));
+        if (await this.user.exists({ email: userData.email }).lean()) {
+            throw new UserWithThatEmailAlreadyExistsException(userData.email);
         } else {
             const hashedPassword = await bcrypt.hash(userData.password, 10);
             const tmpUser = new this.tmpUser({
@@ -94,11 +94,10 @@ class AuthenticationController implements Controller {
 
     private readonly verifyUserEmail = async (
         req: Request<never, never, EmailTokenData>,
-        res: Response,
-        next: NextFunction,
+        res: Response
     ) => {
         const { token } = req.body;
-        const tmpUser = await this.tmpUser.findById(token);
+        const tmpUser = await this.tmpUser.findById(token).lean();
         if (tmpUser !== null) {
             const { email, password, pseudonym } = tmpUser;
             await this.tmpUser.deleteMany({ email: email });
@@ -110,26 +109,25 @@ class AuthenticationController implements Controller {
 
             res.status(201).send({ message: "Udało się zweryfikować e-mail" });
         } else {
-            next(new EmailVerificationNotFoundOrExpired());
+            throw new EmailVerificationNotFoundOrExpired();
         }
     };
 
     private readonly loggingIn = async (
         req: Request<never, never, LoginUserData>,
         res: Response,
-        next: NextFunction,
+        next: NextFunction
     ) => {
         const logInData = req.body;
         const user = await this.user.findOne({ email: logInData.email }, { status: 0 });
         if (user !== null) {
             const isPasswordMatching = await bcrypt.compare(logInData.password, user.password);
+
             if (isPasswordMatching) {
-                user.image = user.imageURL();
-                user.password = undefined;
                 const tokenData = this.createAuthenticationToken(user);
-                res.setHeader("Set-Cookie", [this.createCookie(tokenData)]);
+                await this.authenticationToken.create({ token: tokenData.token, owner: user._id });
+
                 res.send({
-                    user: user,
                     token: tokenData.token,
                     message: "Udało się zalogować",
                 });
@@ -140,14 +138,19 @@ class AuthenticationController implements Controller {
             next(
                 new HttpException(
                     400,
-                    `Konto nie istnieje lub jest nieaktywne. Sprawdź mail: ${logInData.email}`,
-                ),
+                    `Konto nie istnieje lub jest nieaktywne. Sprawdź mail: ${logInData.email}`
+                )
             );
         }
     };
 
+    private autoLogin = async (req: Request, res: Response) => {
+        res.send({ message: "Udało się zalogować" });
+    };
+
     private createAuthenticationToken(user: IUser): TokenData {
-        const expiresIn = 60 * 60;
+        const expiresIn = parseInt(AUTHENTICATION_TOKEN_EXPIRE_AFTER);
+
         const dataStoredInToken: DataStoredInToken = {
             _id: user._id,
             userType: user.type,
@@ -158,18 +161,18 @@ class AuthenticationController implements Controller {
         };
     }
 
-    private createCookie(tokenData: TokenData) {
-        return `Authorization=${tokenData.token}; Max-Age=${tokenData.expiresIn}; path=/;`;
-    }
+    private readonly logOut = async (req: Request, res: Response) => {
+        const bearerHeader = req.headers["authorization"].substring(7);
 
-    private readonly logOut = (req: Request, res: Response) => {
+        await this.authenticationToken.findOneAndDelete({ token: bearerHeader });
+
         res.setHeader("Set-Cookie", ["Authorization=; Max-Age=0; path=/;"]);
         res.send({ message: "Udało się wylogować" });
     };
 
-    private readonly requestResetPassword = async (
+    private readonly resetPassword = async (
         req: Request<never, never, EmailData>,
-        res: Response,
+        res: Response
     ) => {
         const { email } = req.body;
         const user = await this.user.exists({ email });
@@ -183,10 +186,10 @@ class AuthenticationController implements Controller {
         res.send({ message: "Email resetujący hasło został wysłany" });
     };
 
-    private readonly resetPassword = async (
+    private readonly newPassword = async (
         req: Request<never, never, NewPasswordData>,
         res: Response,
-        next: NextFunction,
+        next: NextFunction
     ) => {
         const { newPassword, token } = req.body;
 
@@ -198,22 +201,24 @@ class AuthenticationController implements Controller {
         if (foundToken == null) {
             next(new WrongAuthenticationTokenException());
         } else {
-            await this.passwordResetToken.deleteMany({ userId: foundToken.userId });
+            await this.passwordResetToken.deleteMany({
+                userId: foundToken.userId,
+            });
+            await this.authenticationToken.deleteMany({ owner: foundToken.userId });
             const hashedPassword = await bcrypt.hash(newPassword, 10);
             await this.user.updateOne(
                 { _id: foundToken.userId },
-                { $set: { password: hashedPassword } },
+                { $set: { password: hashedPassword } }
             );
             res.send({ message: "Hasło zostało zresetowane" });
         }
     };
 
     private readonly changeUserPassword = async (
-        req: RequestWithUser,
-        res: Response,
-        next: NextFunction,
+        req: RequestWithUser<ChangePasswordData>,
+        res: Response
     ) => {
-        const { oldPassword, newPassword }: ChangePasswordData = req.body;
+        const { newPassword, oldPassword }: ChangePasswordData = req.body;
 
         const user = await this.user.findById(req.user._id, { password: 1 });
 
@@ -221,9 +226,11 @@ class AuthenticationController implements Controller {
         if (isPasswordMatching) {
             user.password = await bcrypt.hash(newPassword, 10);
             await user.save();
+            await this.authenticationToken.deleteMany({ owner: req.user._id });
+
             res.send({ message: "Hasło zostało zmienione" });
         } else {
-            next(new WrongCredentialsException());
+            throw new WrongCredentialsException();
         }
     };
 }

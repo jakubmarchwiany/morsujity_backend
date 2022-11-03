@@ -7,29 +7,21 @@ import Controller from "./interfaces/controller-interface";
 import errorMiddleware from "./middleware/error-middleware";
 import HttpException from "./middleware/exceptions/http-exception";
 
-const {
-    NODE_ENV,
-    DEV_MONGO_PATH,
-    PRO_MONGO_PATH,
-    DEV_WHITELISTED_DOMAINS,
-    PRO_WHITELISTED_DOMAINS,
-} = process.env;
+const { PORT, MONGO_URL, WHITELISTED_DOMAINS } = process.env;
 
-const MONGO_PATH = NODE_ENV === "development" ? DEV_MONGO_PATH : PRO_MONGO_PATH;
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-const WHITELIST = (() => {
-    if (NODE_ENV === "development") {
-        return DEV_WHITELISTED_DOMAINS ? DEV_WHITELISTED_DOMAINS.split(",") : [];
-    } else {
-        return PRO_WHITELISTED_DOMAINS ? PRO_WHITELISTED_DOMAINS.split(",") : [];
-    }
-})();
+const fakeLoading = async function (req: Request, res: Response, next: NextFunction) {
+    await sleep(500);
+    next();
+};
 
 class Server {
     public app: express.Application;
 
     constructor(controllers: Controller[]) {
         this.app = express();
+        this.app.use(fakeLoading);
         this.connectToTheDatabase();
         this.initializeCors();
         this.initializeMiddlewares();
@@ -39,7 +31,7 @@ class Server {
 
     private connectToTheDatabase() {
         mongoose
-            .connect(MONGO_PATH)
+            .connect(MONGO_URL)
             .then(() => {
                 console.log("Connected to the database");
             })
@@ -57,7 +49,7 @@ class Server {
     private initializeCors() {
         const corsOptions: CorsOptions = {
             origin: function (origin, callback) {
-                if (WHITELIST.indexOf(origin) !== -1 || !origin) {
+                if (WHITELISTED_DOMAINS.split(",").indexOf(origin) !== -1 || !origin) {
                     callback(null, true);
                 } else {
                     callback(new Error("Not allowed by CORS"));
@@ -70,7 +62,7 @@ class Server {
 
     private initializeControllers(controllers: Controller[]) {
         controllers.forEach((controller) => {
-            this.app.use("/api" + controller.path, controller.router);
+            this.app.use(controller.path, controller.router);
         });
         this.app.use("*", (req: Request, res: Response, next: NextFunction) => {
             next(new HttpException(404, "Not found"));
@@ -82,8 +74,8 @@ class Server {
     }
 
     public listen() {
-        this.app.listen(process.env.PORT || 8080, () => {
-            console.log(`Server listening on the port ${process.env.PORT || 8080}`);
+        this.app.listen(PORT, () => {
+            console.log(`Server listening on the port ${PORT}`);
         });
     }
 }

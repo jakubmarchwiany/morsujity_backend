@@ -5,13 +5,13 @@ import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
 import HttpException from "../middleware/exceptions/http-exception";
 
-const { PROJECT_ID, GCLOUD_STORAGE_IMAGE_BUCKET, KEY_FILE_NAME } = process.env;
+const { NODE_ENV, PROJECT_ID, KEY_FILE_NAME, GCLOUD_STORAGE_IMAGE_BUCKET } = process.env;
 
 const ROUNDED_CORNERS = Buffer.from(
-    '<svg><rect x="0" y="0" width="500" height="500" rx="50" ry="50"/></svg>',
+    '<svg><rect x="0" y="0" width="500" height="500" rx="50" ry="50"/></svg>'
 );
 
-class ImageBot {
+class GoogleBot {
     private readonly storage;
     private readonly imageBucket;
     public multer;
@@ -60,23 +60,23 @@ class ImageBot {
                 .toBuffer();
 
             const uniqueName = uuidv4();
-            const imageFile = this.imageBucket.file(uniqueName + ".webp");
+            const imageFile = this.imageBucket.file(`${NODE_ENV}/users/${uniqueName}.webp`);
             await imageFile.save(convertedImage);
 
             return uniqueName;
         } catch (e) {
+            console.log(e);
             throw new HttpException(500, "Błąd podczas zapisu zdjęcia użytkownika");
         }
     };
 
     public deleteUserImage = async (fileName: string) => {
         try {
-            const file = this.imageBucket.file(fileName);
+            const file = this.imageBucket.file(`${NODE_ENV}/users/${fileName}.webp`);
             await file.delete();
-            return true;
         } catch (e) {
             throw new HttpException(500, "Błąd podczas usuwania zdjęcia użytkownika");
         }
     };
 }
-export default ImageBot;
+export default GoogleBot;

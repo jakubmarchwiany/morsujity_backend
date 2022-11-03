@@ -1,35 +1,35 @@
 import { NextFunction, Response } from "express";
 import jwt from "jsonwebtoken";
-
 import RequestWithUser from "../interfaces/request-with-user-interface";
-import DataStoredInToken from "../models/authentication-token/data-stored-in-token-interface";
+import AuthenticationToken from "../models/tokens/authentication-token/authentication-token";
+import { DataStoredInToken } from "../models/tokens/authentication-token/authentication-token-interface";
 
 import AuthenticationTokenMissingException from "./exceptions/authentication-token-missing-exception";
 import WrongAuthenticationTokenException from "./exceptions/wrong-authentication-token-exception";
 
 const { JWT_SECRET } = process.env;
 
-function authMiddleware(request: RequestWithUser, response: Response, next: NextFunction) {
-    const cookies = request.cookies;
-    if (cookies && cookies.Authorization) {
+function authMiddleware(request: RequestWithUser<never>, response: Response, next: NextFunction) {
+    const bearerHeader = request.headers["authorization"];
+
+    if (bearerHeader) {
+        const bearer = bearerHeader.substring(7);
         try {
-            const verificationResponse = jwt.verify(
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                cookies.Authorization,
-                JWT_SECRET,
-            ) as DataStoredInToken;
+            jwt.verify(bearer, JWT_SECRET, async function (err, decoded) {
+                if (err) {
+                    next(new WrongAuthenticationTokenException());
+                } else {
+                    const isExist = await AuthenticationToken.exists({ token: bearer });
 
-            const user = {
-                _id: verificationResponse._id,
-                userType: verificationResponse.userType,
-            };
+                    if (isExist) {
+                        request.user = decoded as DataStoredInToken;
+                        next();
+                        return;
+                    }
 
-            if (user) {
-                request.user = user;
-                next();
-            } else {
-                next(new WrongAuthenticationTokenException());
-            }
+                    next(new WrongAuthenticationTokenException());
+                }
+            });
         } catch (error) {
             next(new WrongAuthenticationTokenException());
         }

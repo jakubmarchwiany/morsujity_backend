@@ -1,4 +1,5 @@
 import { Model } from "mongoose";
+import { IStatistics } from "./statistic/statistics-interface";
 
 export enum UserStatus {
     ACTIVE = "active",
@@ -10,10 +11,6 @@ export enum UserType {
     USER = "user",
 }
 
-export interface IUserMethods {
-    imageURL: () => string;
-}
-
 export interface IUser {
     _id: string;
     email: string;
@@ -22,6 +19,7 @@ export interface IUser {
     type: UserType;
     pseudonym: string;
     image: string;
+    statistics: IStatistics;
     createdIn: Date;
 }
-export type UserModel = Model<IUser, unknown, IUserMethods>;
+export type UserModel = Model<IUser, unknown, unknown>;

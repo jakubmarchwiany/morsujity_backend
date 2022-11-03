@@ -1,4 +1,3 @@
-import "dotenv/config";
 import AuthenticationController from "./controllers/authentication-controller";
 import UserController from "./controllers/user-controller";
 import Server from "./server";

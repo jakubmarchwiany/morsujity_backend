@@ -6,7 +6,7 @@ const registerUserSchema = yup.object({
             .string()
             .required("'pseudonym' wymagane")
             .min(3, "Ksywka za krótka - Co najmniej 3 znaki")
-            .max(15, "Ksywka za długa - Maksymalnie 15 znaków"),
+            .max(30, "Ksywka za długa - Maksymalnie 30 znaków"),
         email: yup.string().required("'email' wymagane").email("Email niepoprawny"),
         password: yup
             .string()

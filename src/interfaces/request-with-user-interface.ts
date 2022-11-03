@@ -1,7 +1,8 @@
 import { Request } from "express";
-import DataStoredInToken from "../models/authentication-token/data-stored-in-token-interface";
+import { DataStoredInToken } from "models/tokens/authentication-token/authentication-token-interface";
 
-interface RequestWithUser extends Request {
+interface RequestWithUser<T> extends Request {
     user?: DataStoredInToken;
+    body: T;
 }
 export default RequestWithUser;

@@ -2,36 +2,40 @@ export {};
 declare global {
     namespace NodeJS {
         interface ProcessEnv {
+            PORT: string;
             NODE_ENV: "development" | "production";
 
-            PORT: string;
-            PROJECT_ID: string;
-            KEY_FILE_NAME: string;
+            // frontend url address
+            FRONT_URL_ADDRESS: string;
 
-            DEV_FRONT_URL_ADDRESS: string;
-            PRO_FRONT_URL_ADDRESS: string;
+            // CORS Options
+            WHITELISTED_DOMAINS: string;
 
-            DEV_WHITELISTED_DOMAINS: string;
-            PRO_WHITELISTED_DOMAINS: string;
+            // MongoDB configuration
+            MONGO_URL: string;
 
-            DEV_MONGO_PATH: string;
-            PRO_MONGO_PATH: string;
-
+            // Authentication configuration
             JWT_SECRET: string;
 
-            SERVER_MAIL_HOST: string;
-            SERVER_MAIL_USER: string;
-            SERVER_MAIL_PASS: string;
+            // E-mail bot configuration
+            MAIL_HOST: string;
+            MAIL_PORT: string;
+            MAIL_USER: string;
+            MAIL_PASS: string;
+            MAIL_FROM: string;
 
-            DEV_USER_EXPIRE_AFTER: string;
-            PRO_USER_EXPIRE_AFTER: string;
+            // Variables USER
+            USER_EXPIRE_AFTER: string;
+            AUTHENTICATION_TOKEN_EXPIRE_AFTER: string;
 
+            // ResetPasswordToken
+            RESET_PASSWORD_TOKEN_EXPIRE_AFTER: string;
+
+            // Google console configuration
+            PROJECT_ID: string;
+            KEY_FILE_NAME: string;
             GCLOUD_STORAGE_IMAGE_BUCKET: string;
             DEF_USER_IMAGE: string;
-            DEF_USER_IMAGE_PATH: string;
-
-            DEV_RESET_PASSWORD_TOKEN_EXPIRE_AFTER: string;
-            PRO_RESET_PASSWORD_TOKEN_EXPIRE_AFTER: string;
         }
     }
 }
