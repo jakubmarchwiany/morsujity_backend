@@ -7,5 +7,7 @@ myKey.json
 .env.production
 .env.development
 
-
-
+.env*
+.flaskenv*
+!.env.project
+!.env.vault
