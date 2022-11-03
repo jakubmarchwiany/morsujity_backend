@@ -3,10 +3,8 @@
         "lib": ["es2021"],
         "module": "commonjs",
         "target": "es2021",
-
         "rootDir": "src",
         "outDir": "build",
-
         "strict": true,
         "noImplicitAny": true,
         "esModuleInterop": true,
@@ -14,7 +12,11 @@
         "resolveJsonModule": true,
         "forceConsistentCasingInFileNames": true,
         "moduleResolution": "node",
-        "strictNullChecks": false
+        "strictNullChecks": false,
+        "baseUrl": "./src"
+    },
+    "ts-node": {
+        "swc": true
     },
     "include": ["src/**/*"],
     "exclude": ["src/**/*.spec.ts"]

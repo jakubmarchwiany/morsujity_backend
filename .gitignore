@@ -1,10 +1,11 @@
 node_modules
-
-.env
-api.yaml
-myKey.json
-
 build
 
-src/public
-src/build
+myKey.json
+
+.env
+.env.production
+.env.development
+
+
+
