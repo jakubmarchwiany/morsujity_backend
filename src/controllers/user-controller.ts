@@ -4,10 +4,10 @@ import RequestWithUser from "../interfaces/request-with-user-interface";
 import authMiddleware from "../middleware/auth-middleware";
 import HttpException from "../middleware/exceptions/http-exception";
 import changePseudonymSchema, {
-    ChangePseudonymData
+    ChangePseudonymData,
 } from "../middleware/schemas/change-pseudonym-schema";
 import deleteActivitySchema, {
-    DeleteActivityData
+    DeleteActivityData,
 } from "../middleware/schemas/delete-activity-schema";
 import newActivitySchema, { NewActivityData } from "../middleware/schemas/new-activity-schema";
 import validate from "../middleware/validate-middleware";
@@ -119,7 +119,7 @@ class UserController implements Controller {
         user.statistics.rank = rankUp(userRank, sumTime);
         await user.save();
 
-        res.send("Udało się dodać aktywność");
+        res.send({ message: "Udało się dodać aktywność", statistics: user.statistics });
     };
 
     private readonly deleteActivity = async (
@@ -166,7 +166,7 @@ class UserController implements Controller {
             );
         }
 
-        res.send("Udało się usunąć aktywność");
+        res.send({ message: "Udało się usunąć aktywność" });
     };
 }
 export default UserController;
