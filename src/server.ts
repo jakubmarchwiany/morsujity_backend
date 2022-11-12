@@ -1,4 +1,5 @@
 import bodyParser from "body-parser";
+import compression from "compression";
 import cookieParser from "cookie-parser";
 import cors, { CorsOptions } from "cors";
 import express, { NextFunction, Request, Response } from "express";
@@ -12,7 +13,7 @@ const { PORT, MONGO_URL, WHITELISTED_DOMAINS } = process.env;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const fakeLoading = async function (req: Request, res: Response, next: NextFunction) {
-    await sleep(500);
+    await sleep(2000);
     next();
 };
 
@@ -21,7 +22,7 @@ class Server {
 
     constructor(controllers: Controller[]) {
         this.app = express();
-        //this.app.use(fakeLoading);
+        // this.app.use(fakeLoading);
         this.connectToTheDatabase();
         this.initializeCors();
         this.initializeMiddlewares();
@@ -43,6 +44,11 @@ class Server {
     private initializeMiddlewares() {
         this.app.use(bodyParser.json({ limit: "10mb" }));
         this.app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
+        this.app.use(
+            compression({
+                threshold: 0,
+            })
+        );
         this.app.use(cookieParser());
     }
 
