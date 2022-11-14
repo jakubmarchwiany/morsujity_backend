@@ -12,7 +12,7 @@ import UserWithThatEmailAlreadyExistsException from "../middleware/exceptions/us
 import WrongAuthenticationTokenException from "../middleware/exceptions/wrong-authentication-token-exception";
 import WrongCredentialsException from "../middleware/exceptions/wrong-credentials-exception";
 import changePasswordSchema, {
-    ChangePasswordData,
+    ChangePasswordData
 } from "../middleware/schemas/change-password-schema";
 import emailSchema, { EmailData } from "../middleware/schemas/email-schema";
 import emailTokenSchema, { EmailTokenData } from "../middleware/schemas/email-token-schema";
@@ -24,7 +24,7 @@ import TmpUser from "../models/tmp-user/tmp-user-model";
 import AuthenticationToken from "../models/tokens/authentication-token/authentication-token";
 import {
     DataStoredInToken,
-    TokenData,
+    TokenData
 } from "../models/tokens/authentication-token/authentication-token-interface";
 import PasswordResetToken from "../models/tokens/password-reset-token/password-reset-token-model";
 import { IUser } from "../models/user/user-interface";
@@ -50,7 +50,6 @@ class AuthenticationController implements Controller {
     }
 
     private initializeRoutes() {
-        this.router.get(`/auto-login`, authMiddleware, catchError(this.autoLogin));
         this.router.post(`/login`, validate(loginUserSchema), catchError(this.loggingIn));
         this.router.get(`/logout`, authMiddleware, this.logOut);
         this.router.post(`/register`, validate(registerUserSchema), catchError(this.registerUser));
@@ -145,10 +144,6 @@ class AuthenticationController implements Controller {
                 )
             );
         }
-    };
-
-    private autoLogin = async (req: Request, res: Response) => {
-        res.send({ message: "Udało się zalogować" });
     };
 
     private createAuthenticationToken(user: IUser): TokenData {
