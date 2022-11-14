@@ -12,7 +12,7 @@ import UserWithThatEmailAlreadyExistsException from "../middleware/exceptions/us
 import WrongAuthenticationTokenException from "../middleware/exceptions/wrong-authentication-token-exception";
 import WrongCredentialsException from "../middleware/exceptions/wrong-credentials-exception";
 import changePasswordSchema, {
-    ChangePasswordData
+    ChangePasswordData,
 } from "../middleware/schemas/change-password-schema";
 import emailSchema, { EmailData } from "../middleware/schemas/email-schema";
 import emailTokenSchema, { EmailTokenData } from "../middleware/schemas/email-token-schema";
@@ -24,7 +24,7 @@ import TmpUser from "../models/tmp-user/tmp-user-model";
 import AuthenticationToken from "../models/tokens/authentication-token/authentication-token";
 import {
     DataStoredInToken,
-    TokenData
+    TokenData,
 } from "../models/tokens/authentication-token/authentication-token-interface";
 import PasswordResetToken from "../models/tokens/password-reset-token/password-reset-token-model";
 import { IUser } from "../models/user/user-interface";
@@ -87,6 +87,7 @@ class AuthenticationController implements Controller {
             });
             await this.mailBot.sendMailEmailUserVerification(tmpUser.email, tmpUser._id);
             await tmpUser.save();
+
             res.status(201).send({
                 message: "Udało się utworzyć konto. Mail z potwierdzeniem wysłany na email",
             });
@@ -161,10 +162,7 @@ class AuthenticationController implements Controller {
 
     private readonly logOut = async (req: Request, res: Response) => {
         const bearerHeader = req.headers["authorization"].substring(7);
-
         await this.authenticationToken.findOneAndDelete({ token: bearerHeader });
-
-        res.setHeader("Set-Cookie", ["Authorization=; Max-Age=0; path=/;"]);
         res.send({ message: "Udało się wylogować" });
     };
 
@@ -180,7 +178,6 @@ class AuthenticationController implements Controller {
             await this.mailBot.sendMailResetUserPassword(email, randomBytes);
             await this.passwordResetToken.create({ token, userId: user });
         }
-
         res.send({ message: "Email resetujący hasło został wysłany" });
     };
 
@@ -208,6 +205,7 @@ class AuthenticationController implements Controller {
                 { _id: foundToken.userId },
                 { $set: { password: hashedPassword } }
             );
+
             res.send({ message: "Hasło zostało zresetowane" });
         }
     };
