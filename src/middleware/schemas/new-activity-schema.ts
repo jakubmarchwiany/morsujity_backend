@@ -13,5 +13,5 @@ const newActivitySchema = yup.object({
             .max(3660, "Maksymalna długość aktywności to 1h"),
     }),
 });
-export type NewActivityData = yup.InferType<typeof newActivitySchema.fields.body>;
+export type NewActivityData = { isMors: boolean; date: Date; duration: number };
 export default newActivitySchema;
