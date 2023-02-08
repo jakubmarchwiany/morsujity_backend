@@ -69,7 +69,7 @@ class UserController implements Controller {
         req: RequestWithUser<ChangePseudonymData>,
         res: Response
     ) => {
-        const { pseudonym }: ChangePseudonymData = req.body;
+        const { pseudonym } = req.body;
         await this.user.findByIdAndUpdate(req.user._id, { pseudonym });
         res.send({ message: "Udało się zaktualizować ksywkę" });
     };
@@ -106,20 +106,21 @@ class UserController implements Controller {
         const { isMors, duration, date } = req.body;
         const activity: IActivity = { isMors, duration, date };
 
-        const user = await this.user.findById(req.user._id, { statistics: 1 });
+        const statistics = await this.user.findById(req.user._id, { statistics: 1 });
+        console.log(statistics)
 
-        user.statistics.activity.push(activity);
-        if (isMors) user.statistics.timeMorses += duration;
-        else user.statistics.timeColdShowers += duration;
+        statistics.statistics.activity.push(activity);
+        if (isMors) statistics.statistics.timeMorses += duration;
+        else statistics.statistics.timeColdShowers += duration;
 
-        const userRank = user.statistics.rank;
-        const { timeColdShowers, timeMorses } = user.statistics;
+        const userRank = statistics.statistics.rank;
+        const { timeColdShowers, timeMorses } = statistics.statistics;
         const sumTime = timeColdShowers + timeMorses;
 
-        user.statistics.rank = rankUp(userRank, sumTime);
-        await user.save();
+        statistics.statistics.rank = rankUp(userRank, sumTime);
+        await statistics.save();
 
-        res.send({ message: "Udało się dodać aktywność", statistics: user.statistics });
+        res.send({ message: "Udało się dodać aktywność", statistics: statistics.statistics });
     };
 
     private readonly deleteActivity = async (

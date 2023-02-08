@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { NextFunction, Request, Response, Router } from "express";
 import jwt from "jsonwebtoken";
+import loginUserSchema, { LoginUserData } from "../middleware/schemas/login-user-schema";
 import sha256 from "sha256";
 import { v4 as uuidv4 } from "uuid";
 import Controller from "../interfaces/controller-interface";
@@ -16,7 +17,6 @@ import changePasswordSchema, {
 } from "../middleware/schemas/change-password-schema";
 import emailSchema, { EmailData } from "../middleware/schemas/email-schema";
 import emailTokenSchema, { EmailTokenData } from "../middleware/schemas/email-token-schema";
-import loginUserSchema, { LoginUserData } from "../middleware/schemas/login-user-schema";
 import registerUserSchema, { RegisterUserData } from "../middleware/schemas/register-user-schema";
 import resetPasswordSchema, { NewPasswordData } from "../middleware/schemas/reset-password-schema";
 import validate from "../middleware/validate-middleware";
