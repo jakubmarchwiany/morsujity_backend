@@ -3,10 +3,7 @@ import * as yup from "yup";
 const newActivitySchema = yup.object({
     body: yup.object({
         isMors: yup.boolean().required("'isMors' wymagane"),
-        date: yup
-            .date()
-            .required("'data' wymagane")
-            .max(new Date(), "Nie możesz wpisać daty z przyszłości"),
+        date: yup.date().required("'data' wymagane"),
         duration: yup
             .number()
             .required("'duration' wymagane")
