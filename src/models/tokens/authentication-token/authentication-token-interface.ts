@@ -2,7 +2,7 @@ import { ObjectId } from "mongoose";
 
 export interface DataStoredInToken {
     _id: string;
-    userType: string;
+    data: string;
 }
 
 export interface TokenData {

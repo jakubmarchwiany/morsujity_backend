@@ -1,5 +1,5 @@
-import { IRank } from "../models/user/statistic/rank-interface";
-import { ranks } from "../models/user/statistic/ranks-data";
+import { IRank } from "../models/user-data/statistic/rank-interface";
+import { ranks } from "../models/user-data/statistic/ranks-data";
 
 export function rankUp(userRank: IRank, totalTime: number): IRank {
     for (let i = userRank.N; i < ranks.length; i++) {
