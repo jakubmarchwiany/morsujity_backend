@@ -7,8 +7,16 @@ import mongoose from "mongoose";
 import Controller from "./interfaces/controller-interface";
 import errorMiddleware from "./middleware/error-middleware";
 import HttpException from "./middleware/exceptions/http-exception";
+import rateLimiter from "express-rate-limit"
 
 const { PORT, MONGO_URL, WHITELISTED_DOMAINS } = process.env;
+
+const rateLimit = rateLimiter({
+	max: 100, // the rate limit in reqs
+	windowMs: 1 * 60 * 1000, // time where limit applies
+    handler: (request, response, next, options) =>
+		response.status(options.statusCode).send({message: "Za dużo zapytań, spróbuj ponownie za chwilę"}),
+});
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -50,6 +58,7 @@ class Server {
             })
         );
         this.app.use(cookieParser());
+        this.app.use(rateLimit)
     }
 
     private initializeCors() {
