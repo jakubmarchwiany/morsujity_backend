@@ -1,7 +1,6 @@
 import bcrypt from "bcryptjs";
 import { NextFunction, Request, Response, Router } from "express";
 import jwt from "jsonwebtoken";
-import loginUserSchema, { LoginUserData } from "../middleware/schemas/login-user-schema";
 import sha256 from "sha256";
 import { v4 as uuidv4 } from "uuid";
 import Controller from "../interfaces/controller-interface";
@@ -17,6 +16,7 @@ import changePasswordSchema, {
 } from "../middleware/schemas/change-password-schema";
 import emailSchema, { EmailData } from "../middleware/schemas/email-schema";
 import emailTokenSchema, { EmailTokenData } from "../middleware/schemas/email-token-schema";
+import loginUserSchema, { LoginUserData } from "../middleware/schemas/login-user-schema";
 import registerUserSchema, { RegisterUserData } from "../middleware/schemas/register-user-schema";
 import resetPasswordSchema, { NewPasswordData } from "../middleware/schemas/reset-password-schema";
 import validate from "../middleware/validate-middleware";
@@ -27,11 +27,11 @@ import {
     TokenData,
 } from "../models/tokens/authentication-token/authentication-token-interface";
 import PasswordResetToken from "../models/tokens/password-reset-token/password-reset-token-model";
+import UserData from "../models/user-data/user-data-model";
 import { IUser } from "../models/user/user-interface";
 import User from "../models/user/user-model";
 import catchError from "../utils/catch-error";
 import MailBot from "../utils/mail-bot";
-import UserData from "../models/user-data/user-data-model";
 
 const { JWT_SECRET, AUTHENTICATION_TOKEN_EXPIRE_AFTER } = process.env;
 

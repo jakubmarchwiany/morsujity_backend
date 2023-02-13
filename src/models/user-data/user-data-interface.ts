@@ -8,4 +8,5 @@ export interface IUserData {
     statistics: IStatistics;
     createdIn: Date;
 }
+
 export type UserDataModel = Model<IUserData, unknown, unknown>;
