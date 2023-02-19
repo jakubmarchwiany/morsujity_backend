@@ -1,8 +1,8 @@
-import { Model } from "mongoose";
-import { IStatistics } from "./statistic/statistics-interface";
+import { Model, ObjectId, Schema } from "mongoose";
 
 export enum UserStatus {
     ACTIVE = "active",
+    INACTIVE = "inactive",
     BANNED = "banned",
 }
 
@@ -17,9 +17,6 @@ export interface IUser {
     password: string | undefined;
     status: UserStatus;
     type: UserType;
-    pseudonym: string;
-    image: string;
-    statistics: IStatistics;
-    createdIn: Date;
+    data: ObjectId;
 }
 export type UserModel = Model<IUser, unknown, unknown>;

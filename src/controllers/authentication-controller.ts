@@ -1,7 +1,6 @@
 import bcrypt from "bcryptjs";
 import { NextFunction, Request, Response, Router } from "express";
 import jwt from "jsonwebtoken";
-import loginUserSchema, { LoginUserData } from "../middleware/schemas/login-user-schema";
 import sha256 from "sha256";
 import { v4 as uuidv4 } from "uuid";
 import Controller from "../interfaces/controller-interface";
@@ -17,6 +16,7 @@ import changePasswordSchema, {
 } from "../middleware/schemas/change-password-schema";
 import emailSchema, { EmailData } from "../middleware/schemas/email-schema";
 import emailTokenSchema, { EmailTokenData } from "../middleware/schemas/email-token-schema";
+import loginUserSchema, { LoginUserData } from "../middleware/schemas/login-user-schema";
 import registerUserSchema, { RegisterUserData } from "../middleware/schemas/register-user-schema";
 import resetPasswordSchema, { NewPasswordData } from "../middleware/schemas/reset-password-schema";
 import validate from "../middleware/validate-middleware";
@@ -27,6 +27,7 @@ import {
     TokenData,
 } from "../models/tokens/authentication-token/authentication-token-interface";
 import PasswordResetToken from "../models/tokens/password-reset-token/password-reset-token-model";
+import UserData from "../models/user-data/user-data-model";
 import { IUser } from "../models/user/user-interface";
 import User from "../models/user/user-model";
 import catchError from "../utils/catch-error";
@@ -40,6 +41,7 @@ class AuthenticationController implements Controller {
     public router = Router();
     public path = "/auth";
     private readonly user = User;
+    private readonly userData = UserData;
     private readonly tmpUser = TmpUser;
     private readonly authenticationToken = AuthenticationToken;
     private readonly passwordResetToken = PasswordResetToken;
@@ -85,7 +87,7 @@ class AuthenticationController implements Controller {
                 ...userData,
                 password: hashedPassword,
             });
-            await this.mailBot.sendMailEmailUserVerification(tmpUser.email, tmpUser._id);
+            // await this.mailBot.sendMailEmailUserVerification(tmpUser.email, tmpUser._id);
             await tmpUser.save();
 
             res.status(201).send({
@@ -103,10 +105,13 @@ class AuthenticationController implements Controller {
         if (tmpUser !== null) {
             const { email, password, pseudonym } = tmpUser;
             await this.tmpUser.deleteMany({ email: email });
+            let userData = await this.userData.create({ pseudonym });
+            console.log(userData._id);
             await this.user.create({
                 email,
                 password,
                 pseudonym,
+                data: userData._id,
             });
 
             res.status(201).send({ message: "Udało się zweryfikować e-mail" });
@@ -120,11 +125,10 @@ class AuthenticationController implements Controller {
         res: Response,
         next: NextFunction
     ) => {
-        const logInData = req.body;
-        const user = await this.user.findOne({ email: logInData.email }, { status: 0 });
-        await sleep(1500);
+        const { email, password } = req.body;
+        const user = await this.user.findOne({ email });
         if (user !== null) {
-            const isPasswordMatching = await bcrypt.compare(logInData.password, user.password);
+            const isPasswordMatching = await bcrypt.compare(password, user.password);
 
             if (isPasswordMatching) {
                 const tokenData = this.createAuthenticationToken(user);
@@ -141,7 +145,7 @@ class AuthenticationController implements Controller {
             next(
                 new HttpException(
                     400,
-                    `Konto nie istnieje lub jest nieaktywne. Sprawdź mail: ${logInData.email}`
+                    `Konto nie istnieje lub jest nieaktywne. Sprawdź mail: ${email}`
                 )
             );
         }
@@ -152,7 +156,7 @@ class AuthenticationController implements Controller {
 
         const dataStoredInToken: DataStoredInToken = {
             _id: user._id,
-            userType: user.type,
+            data: `${user.data}`,
         };
         return {
             expiresIn,

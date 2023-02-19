@@ -1,6 +1,7 @@
 import { Schema } from "mongoose";
 
 export interface IActivity {
+    _id?: string;
     isMors: boolean;
     duration: number;
     date: Date;

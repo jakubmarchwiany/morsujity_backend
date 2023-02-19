@@ -1,7 +1,7 @@
 import { Schema } from "mongoose";
 import { activitySchema, IActivity } from "./activity-interface";
 import { IRank, rankSchema } from "./rank-interface";
-import { firstRank } from "./ranks-data";
+import { firstRank, firstSubRank } from "./ranks-data";
 
 export interface IStatisticsMethods {
     newActivity: () => void;
@@ -10,23 +10,25 @@ export interface IStatisticsMethods {
 
 export interface IStatistics {
     rank: IRank;
+    subRank: IRank;
     timeMorses: number;
     timeColdShowers: number;
-    activity: [IActivity];
+    activity: IActivity[];
 }
 
 const statisticsSchema = new Schema<IStatistics, IStatisticsMethods>(
     {
         rank: { type: rankSchema, default: firstRank },
+        subRank: { type: rankSchema, default: firstSubRank },
         timeMorses: { type: Number, default: 0 },
         timeColdShowers: { type: Number, default: 0 },
         activity: [activitySchema],
     },
-    { _id: false },
+    { _id: false }
 );
 
 statisticsSchema.methods.newActivity = function (activity: IActivity, isMors: boolean) {
-    if (isMors) {
+    if (activity.isMors) {
         this.morses.push(activity);
         this.totalTimeOfMorses += activity.duration;
     } else {
@@ -38,7 +40,7 @@ statisticsSchema.methods.newActivity = function (activity: IActivity, isMors: bo
 statisticsSchema.methods.deleteActivity = function (
     activityID: string,
     activity: IActivity,
-    isMors: boolean,
+    isMors: boolean
 ) {
     if (isMors) {
         if (this.morses.id(activityID)) {

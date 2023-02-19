@@ -1,38 +1,41 @@
-import { IRank } from "../models/user/statistic/rank-interface";
-import { ranks } from "../models/user/statistic/ranks-data";
+import { IRank } from "../models/user-data/statistic/rank-interface";
+import { RANKS as RANKS, SUBRANKS } from "../models/user-data/statistic/ranks-data";
 
-export function rankUp(userRank: IRank, totalTime: number): IRank {
-    for (let i = userRank.N; i < ranks.length; i++) {
-        if (totalTime < ranks[i].maxValue) {
-            for (let j = userRank.subRank.N; j < ranks[i].subRanks.length; j++) {
-                if (totalTime < ranks[i].subRanks[j].maxValue) {
-                    return {
-                        N: i,
-                        name: ranks[i].name,
-                        image: ranks[i].image,
-                        subRank: { N: j, name: ranks[i].subRanks[j].name },
-                    };
-                }
-            }
+export function rankUp(currentRank: IRank, currentSubRank: IRank, totalTime: number) {
+    let newRanks = [];
+    for (let i = currentRank.N; i < RANKS.length; i++) {
+        if (totalTime < RANKS[i].maxValue) {
+            newRanks[0] = RANKS[i];
             break;
         }
     }
+
+    for (let i = currentSubRank.N; i < SUBRANKS.length; i++) {
+        if (totalTime < SUBRANKS[i].maxValue) {
+            newRanks[1] = SUBRANKS[i];
+            break;
+        }
+    }
+
+    return newRanks;
 }
 
-export function rankDown(userRank: IRank, totalTime: number): IRank {
-    for (let i = userRank.N; i >= 0; i--) {
-        if (i == 0 || totalTime > ranks[i - 1].maxValue) {
-            for (let j = userRank.subRank.N; j >= 0; j--) {
-                if (j == 0 || totalTime > ranks[i].subRanks[j - 1].maxValue) {
-                    return {
-                        N: i,
-                        name: ranks[i].name,
-                        image: ranks[i].image,
-                        subRank: { N: j, name: ranks[i].subRanks[j].name },
-                    };
-                }
-            }
+export function rankDown(currentRank: IRank, currentSubRank: IRank, totalTime: number) {
+    let newRanks = [];
+    console.log(currentRank, currentSubRank, totalTime);
+
+    for (let i = currentRank.N; i >= 0; i--) {
+        if (totalTime >= RANKS[i].maxValue || i == 0) {
+            newRanks[0] = RANKS[i];
             break;
         }
     }
+    for (let i = currentSubRank.N; i >= 0; i--) {
+        if (totalTime >= SUBRANKS[i].maxValue || i == 0) {
+            newRanks[1] = SUBRANKS[i];
+            break;
+        }
+    }
+
+    return newRanks;
 }

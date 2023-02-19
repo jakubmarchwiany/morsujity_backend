@@ -13,8 +13,7 @@
         "forceConsistentCasingInFileNames": true,
         "moduleResolution": "node",
         "strictNullChecks": false,
-        "typeRoots": ["node_modules/yup"],
-        "baseUrl": "./src"
+        "typeRoots": ["node_modules/yup"]
     },
     "ts-node": {
         "swc": true
