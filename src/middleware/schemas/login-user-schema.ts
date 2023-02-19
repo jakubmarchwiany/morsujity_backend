@@ -1,13 +1,11 @@
-import * as yup from "yup";
+import { InferType, object, string } from "yup";
 
-const loginUserSchema = yup.object({
-    body: yup.object({
-        email: yup
-            .string()
+const loginUserSchema = object({
+    body: object({
+        email: string()
             .required("'email' wymagane")
             .email("Podano nieprawidłowe dane uwierzytelniające"),
-        password: yup
-            .string()
+        password: string()
             .required("'password' wymagane")
             .min(8, "Podano nieprawidłowe dane uwierzytelniające")
             .max(20, "Podano nieprawidłowe dane uwierzytelniające")
@@ -17,5 +15,5 @@ const loginUserSchema = yup.object({
             .matches(/(?=.*[!@#$%^&*])/, "Podano nieprawidłowe dane uwierzytelniające"),
     }),
 });
-export type LoginUserData = yup.InferType<typeof loginUserSchema.fields.body>;
+export type LoginUserData = InferType<typeof loginUserSchema>;
 export default loginUserSchema;

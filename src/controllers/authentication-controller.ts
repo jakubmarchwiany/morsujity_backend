@@ -4,8 +4,7 @@ import jwt from "jsonwebtoken";
 import sha256 from "sha256";
 import { v4 as uuidv4 } from "uuid";
 import Controller from "../interfaces/controller-interface";
-import RequestWithUser from "../interfaces/request-with-user-interface";
-import authMiddleware from "../middleware/auth-middleware";
+import authMiddleware, { ReqUser } from "../middleware/auth-middleware";
 import EmailVerificationNotFoundOrExpired from "../middleware/exceptions/email-verification-not-found-or-expired-exception";
 import HttpException from "../middleware/exceptions/http-exception";
 import UserWithThatEmailAlreadyExistsException from "../middleware/exceptions/user-with-that-email-already-exists-exception";
@@ -14,11 +13,11 @@ import WrongCredentialsException from "../middleware/exceptions/wrong-credential
 import changePasswordSchema, {
     ChangePasswordData,
 } from "../middleware/schemas/change-password-schema";
-import emailSchema, { EmailData } from "../middleware/schemas/email-schema";
+import resetPasswordSchema, { ResetEmailData } from "../middleware/schemas/email-schema";
 import emailTokenSchema, { EmailTokenData } from "../middleware/schemas/email-token-schema";
 import loginUserSchema, { LoginUserData } from "../middleware/schemas/login-user-schema";
 import registerUserSchema, { RegisterUserData } from "../middleware/schemas/register-user-schema";
-import resetPasswordSchema, { NewPasswordData } from "../middleware/schemas/reset-password-schema";
+import { NewPasswordData } from "../middleware/schemas/reset-password-schema";
 import validate from "../middleware/validate-middleware";
 import TmpUser from "../models/tmp-user/tmp-user-model";
 import AuthenticationToken from "../models/tokens/authentication-token/authentication-token";
@@ -60,7 +59,11 @@ class AuthenticationController implements Controller {
             validate(emailTokenSchema),
             catchError(this.verifyUserEmail)
         );
-        this.router.post(`/reset-password`, validate(emailSchema), catchError(this.resetPassword));
+        this.router.post(
+            `/reset-password`,
+            validate(resetPasswordSchema),
+            catchError(this.resetPassword)
+        );
         this.router.post(
             `/new-password`,
             validate(resetPasswordSchema),
@@ -75,16 +78,17 @@ class AuthenticationController implements Controller {
     }
 
     private readonly registerUser = async (
-        req: Request<never, never, RegisterUserData>,
+        req: Request<never, never, RegisterUserData["body"]>,
         res: Response
     ) => {
-        const userData = req.body;
-        if (await this.user.exists({ email: userData.email }).lean()) {
-            throw new UserWithThatEmailAlreadyExistsException(userData.email);
+        const { email, password, pseudonym } = req.body;
+        if (await this.user.exists({ email }).lean()) {
+            throw new UserWithThatEmailAlreadyExistsException(email);
         } else {
-            const hashedPassword = await bcrypt.hash(userData.password, 10);
+            const hashedPassword = await bcrypt.hash(password, 10);
             const tmpUser = new this.tmpUser({
-                ...userData,
+                pseudonym,
+                email,
                 password: hashedPassword,
             });
             // await this.mailBot.sendMailEmailUserVerification(tmpUser.email, tmpUser._id);
@@ -97,7 +101,7 @@ class AuthenticationController implements Controller {
     };
 
     private readonly verifyUserEmail = async (
-        req: Request<never, never, EmailTokenData>,
+        req: Request<never, never, EmailTokenData["body"]>,
         res: Response
     ) => {
         const { token } = req.body;
@@ -106,7 +110,7 @@ class AuthenticationController implements Controller {
             const { email, password, pseudonym } = tmpUser;
             await this.tmpUser.deleteMany({ email: email });
             let userData = await this.userData.create({ pseudonym });
-            console.log(userData._id);
+
             await this.user.create({
                 email,
                 password,
@@ -121,12 +125,12 @@ class AuthenticationController implements Controller {
     };
 
     private readonly loggingIn = async (
-        req: Request<never, never, LoginUserData>,
+        req: Request<never, never, LoginUserData["body"]>,
         res: Response,
         next: NextFunction
     ) => {
         const { email, password } = req.body;
-        const user = await this.user.findOne({ email });
+        const user = await this.user.findOne({ email }).lean();
         if (user !== null) {
             const isPasswordMatching = await bcrypt.compare(password, user.password);
 
@@ -171,7 +175,7 @@ class AuthenticationController implements Controller {
     };
 
     private readonly resetPassword = async (
-        req: Request<never, never, EmailData>,
+        req: Request<never, never, ResetEmailData["body"]>,
         res: Response
     ) => {
         const { email } = req.body;
@@ -186,7 +190,7 @@ class AuthenticationController implements Controller {
     };
 
     private readonly newPassword = async (
-        req: Request<never, never, NewPasswordData>,
+        req: Request<never, never, NewPasswordData["body"]>,
         res: Response,
         next: NextFunction
     ) => {
@@ -215,10 +219,10 @@ class AuthenticationController implements Controller {
     };
 
     private readonly changeUserPassword = async (
-        req: RequestWithUser<ChangePasswordData>,
+        req: Request<never, never, ChangePasswordData["body"]> & ReqUser,
         res: Response
     ) => {
-        const { newPassword, oldPassword }: ChangePasswordData = req.body;
+        const { newPassword, oldPassword } = req.body;
 
         const user = await this.user.findById(req.user._id, { password: 1 });
 

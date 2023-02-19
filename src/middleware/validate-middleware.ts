@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import yup from "yup";
+import { Schema } from "yup";
 
 import HttpException from "./exceptions/http-exception";
 
-function validate(schema: yup.AnySchema) {
+function validate(schema: Schema) {
     return (req: Request, res: Response, next: NextFunction) => {
         schema
             .validate({

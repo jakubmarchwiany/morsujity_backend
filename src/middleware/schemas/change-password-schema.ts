@@ -1,9 +1,8 @@
-import * as yup from "yup";
+import { InferType, object, string } from "yup";
 
-const changePasswordSchema = yup.object({
-    body: yup.object({
-        oldPassword: yup
-            .string()
+const changePasswordSchema = object({
+    body: object({
+        oldPassword: string()
             .required("'oldPassword' wymagane")
             .min(8, "Hasło za krótkie - co najmniej 8 znaków")
             .max(20, "Hasło za długie - maksymalnie 20 znaków")
@@ -11,8 +10,7 @@ const changePasswordSchema = yup.object({
             .matches(/(?=.*[A-Z])/, "Musi zawierać dużą literę")
             .matches(/(?=.*[0-9])/, "Musi zawierać cyfrę")
             .matches(/(?=.*[!@#$%^&*])/, "Musi zawierać znak specjalny (! @ # $ % ^ & *)"),
-        newPassword: yup
-            .string()
+        newPassword: string()
             .required("'newPassword' wymagane")
             .min(8, "Hasło za krótkie - co najmniej 8 znaków")
             .max(20, "Hasło za długie - maksymalnie 20 znaków")
@@ -22,5 +20,5 @@ const changePasswordSchema = yup.object({
             .matches(/(?=.*[!@#$%^&*])/, "Musi zawierać znak specjalny (! @ # $ % ^ & *)"),
     }),
 });
-export type ChangePasswordData = yup.InferType<typeof changePasswordSchema.fields.body>;
+export type ChangePasswordData = InferType<typeof changePasswordSchema>;
 export default changePasswordSchema;

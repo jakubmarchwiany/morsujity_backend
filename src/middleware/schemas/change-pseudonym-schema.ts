@@ -1,13 +1,12 @@
-import * as yup from "yup";
+import { InferType, object, string } from "yup";
 
-const changePseudonymSchema = yup.object({
-    body: yup.object({
-        pseudonym: yup
-            .string()
+const changePseudonymSchema = object({
+    body: object({
+        pseudonym: string()
             .required("'pseudonym' wymagane")
             .min(3, "Ksywka za krótka - Co najmniej 3 znaki")
             .max(30, "Ksywka za długa - Maksymalnie 30 znaków"),
     }),
 });
-export type ChangePseudonymData = yup.InferType<typeof changePseudonymSchema.fields.body>;
+export type ChangePseudonymData = InferType<typeof changePseudonymSchema>;
 export default changePseudonymSchema;

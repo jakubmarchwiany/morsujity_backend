@@ -1,9 +1,8 @@
-import * as yup from "yup";
+import { InferType, object, string } from "yup";
 
-const resetPasswordSchema = yup.object({
-    body: yup.object({
-        newPassword: yup
-            .string()
+const resetPasswordSchema = object({
+    body: object({
+        newPassword: string()
             .required("'newPassword' wymagane")
             .min(8, "Hasło za krótkie - co najmniej 8 znaków")
             .max(20, "Hasło za długie - maksymalnie 20 znaków")
@@ -11,8 +10,8 @@ const resetPasswordSchema = yup.object({
             .matches(/(?=.*[A-Z])/, "Musi zawierać dużą literę")
             .matches(/(?=.*[0-9])/, "Musi zawierać cyfrę")
             .matches(/(?=.*[!@#$%^&*])/, "Musi zawierać znak specjalny (! @ # $ % ^ & *)"),
-        token: yup.string().required("'token' wymagane").length(36, "Token niepoprawny"),
+        token: string().required("'token' wymagane").length(36, "Token niepoprawny"),
     }),
 });
-export type NewPasswordData = yup.InferType<typeof resetPasswordSchema.fields.body>;
+export type NewPasswordData = InferType<typeof resetPasswordSchema>;
 export default resetPasswordSchema;

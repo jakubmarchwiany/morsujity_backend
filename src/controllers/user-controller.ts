@@ -1,13 +1,12 @@
-import { Response, Router } from "express";
+import { Request, Response, Router } from "express";
 import Controller from "../interfaces/controller-interface";
-import RequestWithUser from "../interfaces/request-with-user-interface";
-import authMiddleware from "../middleware/auth-middleware";
+import authMiddleware, { ReqUser } from "../middleware/auth-middleware";
 import HttpException from "../middleware/exceptions/http-exception";
 import changePseudonymSchema, {
-    ChangePseudonymData
+    ChangePseudonymData,
 } from "../middleware/schemas/change-pseudonym-schema";
 import deleteActivitySchema, {
-    DeleteActivityData
+    DeleteActivityData,
 } from "../middleware/schemas/delete-activity-schema";
 import newActivitySchema, { NewActivityData } from "../middleware/schemas/new-activity-schema";
 import validate from "../middleware/validate-middleware";
@@ -63,7 +62,7 @@ class UserController implements Controller {
         );
     }
 
-    private readonly getUserData = async (req: RequestWithUser<never>, res: Response) => {
+    private readonly getUserData = async (req: Request & ReqUser, res: Response) => {
         const userData = await this.userData
             .findById(req.user.data, {
                 "statistics.activity": { $slice: -5 },
@@ -71,7 +70,7 @@ class UserController implements Controller {
             .lean();
         res.send({ user: userData, message: "Udało się autoryzować użytkownika" });
     };
-    private readonly getAllActivity = async (req: RequestWithUser<never>, res: Response) => {
+    private readonly getAllActivity = async (req: Request & ReqUser, res: Response) => {
         const userData = await this.userData
             .findById(req.user.data, {
                 "statistics.activity": 1,
@@ -84,7 +83,7 @@ class UserController implements Controller {
     };
 
     private readonly changeUserPseudonym = async (
-        req: RequestWithUser<ChangePseudonymData>,
+        req: Request<never, never, ChangePseudonymData["body"]> & ReqUser,
         res: Response
     ) => {
         const { pseudonym } = req.body;
@@ -92,7 +91,7 @@ class UserController implements Controller {
         res.send({ message: "Udało się zaktualizować ksywkę" });
     };
 
-    private readonly changeUserImage = async (req: RequestWithUser<never>, res: Response) => {
+    private readonly changeUserImage = async (req: Request & ReqUser, res: Response) => {
         const fileName = await this.imageBot.saveNewUserImage(req.file);
         const user = await this.userData.findById(req.user.data, { image: 1 });
 
@@ -107,7 +106,7 @@ class UserController implements Controller {
         });
     };
 
-    private readonly changeUserImageToDef = async (req: RequestWithUser<never>, res: Response) => {
+    private readonly changeUserImageToDef = async (req: Request & ReqUser, res: Response) => {
         const user = await this.userData.findById(req.user.data, { image: 1 });
 
         if (user.image === "def")
@@ -123,7 +122,10 @@ class UserController implements Controller {
         });
     };
 
-    private readonly newActivity = async (req: RequestWithUser<NewActivityData>, res: Response) => {
+    private readonly newActivity = async (
+        req: Request<never, never, NewActivityData["body"]> & ReqUser,
+        res: Response
+    ) => {
         const { isMors, duration, date } = req.body;
 
         const s = await this.userData.findById(req.user.data, {
@@ -165,7 +167,7 @@ class UserController implements Controller {
     };
 
     private readonly deleteActivity = async (
-        req: RequestWithUser<DeleteActivityData>,
+        req: Request<never, never, DeleteActivityData["body"]> & ReqUser,
         res: Response
     ) => {
         const { activityID } = req.body;

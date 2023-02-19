@@ -1,12 +1,11 @@
-import * as yup from "yup";
+import { InferType, object, string } from "yup";
 
-const deleteActivitySchema = yup.object({
-    body: yup.object({
-        activityID: yup
-            .string()
+const deleteActivitySchema = object({
+    body: object({
+        activityID: string()
             .required("'activityID' wymagane")
             .length(24, "'activityID' niepoprawny"),
     }),
 });
-export type DeleteActivityData = yup.InferType<typeof deleteActivitySchema.fields.body>;
+export type DeleteActivityData = InferType<typeof deleteActivitySchema>;
 export default deleteActivitySchema;

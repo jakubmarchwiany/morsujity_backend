@@ -35,7 +35,7 @@
         "sha256": "^0.2.0",
         "sharp": "^0.31.1",
         "uuid": "^9.0.0",
-        "yup": "^0.32.11"
+        "yup": "1.0.0"
     },
     "devDependencies": {
         "@types/bcryptjs": "^2.4.2",

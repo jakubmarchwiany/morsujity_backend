@@ -1,15 +1,13 @@
-import * as yup from "yup";
+import { InferType, object, string } from "yup";
 
-const registerUserSchema = yup.object({
-    body: yup.object({
-        pseudonym: yup
-            .string()
+const registerUserSchema = object({
+    body: object({
+        pseudonym: string()
             .required("'pseudonym' wymagane")
             .min(3, "Ksywka za krótka - Co najmniej 3 znaki")
             .max(30, "Ksywka za długa - Maksymalnie 30 znaków"),
-        email: yup.string().required("'email' wymagane").email("Email niepoprawny"),
-        password: yup
-            .string()
+        email: string().required("'email' wymagane").email("Email niepoprawny"),
+        password: string()
             .required("'password' wymagane")
             .min(8, "Hasło za krótkie - co najmniej 8 znaków")
             .max(20, "Hasło za długie - maksymalnie 20 znaków")
@@ -19,5 +17,5 @@ const registerUserSchema = yup.object({
             .matches(/(?=.*[!@#$%^&*])/, "Musi zawierać znak specjalny (! @ # $ % ^ & *)"),
     }),
 });
-export type RegisterUserData = yup.InferType<typeof registerUserSchema.fields.body>;
+export type RegisterUserData = InferType<typeof registerUserSchema>;
 export default registerUserSchema;
