@@ -11,6 +11,7 @@
     "scripts": {
         "start": "NODE_ENV=production node -r dotenv/config app.js dotenv_config_path=.env.production",
         "start-dev": "NODE_ENV=production node -r dotenv/config app.js dotenv_config_path=.env.production",
+        "mongo": "start_mongoDB.bat",
         "dev": "NODE_ENV=development nodemon --exec ts-node -r dotenv/config ./src/app.ts dotenv_config_path=./.env.development",
         "build": "rimraf ./build && tsc && cp -r ./src/utils/mail-messages ./build/utils/ && cp package.json package-lock.json myKey.json {.env.production} ./build/"
     },

@@ -12,12 +12,14 @@ import WrongAuthenticationTokenException from "../middleware/exceptions/wrong-au
 import WrongCredentialsException from "../middleware/exceptions/wrong-credentials-exception";
 import changePasswordSchema, {
     ChangePasswordData,
-} from "../middleware/schemas/change-password-schema";
-import resetPasswordSchema, { ResetEmailData } from "../middleware/schemas/email-schema";
-import emailTokenSchema, { EmailTokenData } from "../middleware/schemas/email-token-schema";
-import loginUserSchema, { LoginUserData } from "../middleware/schemas/login-user-schema";
-import registerUserSchema, { RegisterUserData } from "../middleware/schemas/register-user-schema";
-import { NewPasswordData } from "../middleware/schemas/reset-password-schema";
+} from "../middleware/schemas/auth/change-password-schema";
+import resetPasswordSchema, { ResetEmailData } from "../middleware/schemas/auth/email-schema";
+import emailTokenSchema, { EmailTokenData } from "../middleware/schemas/auth/email-token-schema";
+import loginUserSchema, { LoginUserData } from "../middleware/schemas/auth/login-user-schema";
+import registerUserSchema, {
+    RegisterUserData,
+} from "../middleware/schemas/auth/register-user-schema";
+import { NewPasswordData } from "../middleware/schemas/auth/reset-password-schema";
 import validate from "../middleware/validate-middleware";
 import TmpUser from "../models/tmp-user/tmp-user-model";
 import AuthenticationToken from "../models/tokens/authentication-token/authentication-token";
