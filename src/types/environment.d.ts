@@ -7,6 +7,7 @@ declare global {
 
             // frontend url address
             FRONT_URL_ADDRESS: string;
+            USER_APP_DOMAIN: string;
 
             // CORS Options
             WHITELISTED_DOMAINS: string;

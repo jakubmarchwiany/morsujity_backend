@@ -2,15 +2,15 @@ import { Request, Response, Router } from "express";
 import Controller from "../interfaces/controller-interface";
 import authMiddleware, { ReqUser } from "../middleware/auth-middleware";
 import HttpException from "../middleware/exceptions/http-exception";
-import changePseudonymSchema, {
-    ChangePseudonymData,
-} from "../middleware/schemas/user/change-pseudonym-schema";
 import deleteActivitySchema, {
     DeleteActivityData,
 } from "../middleware/schemas/activity/delete-activity-schema";
 import newActivitySchema, {
     NewActivityData,
 } from "../middleware/schemas/activity/new-activity-schema";
+import changePseudonymSchema, {
+    ChangePseudonymData,
+} from "../middleware/schemas/user/change-pseudonym-schema";
 import validate from "../middleware/validate-middleware";
 import { IActivity } from "../models/user-data/statistic/activity-interface";
 import UserData from "../models/user-data/user-data-model";

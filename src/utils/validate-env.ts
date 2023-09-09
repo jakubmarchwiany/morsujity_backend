@@ -11,6 +11,7 @@ function validateEnv() {
 
         // frontend url address
         FRONT_URL_ADDRESS: str(),
+        USER_APP_DOMAIN: str(),
 
         // CORS Options
         WHITELISTED_DOMAINS: str(),

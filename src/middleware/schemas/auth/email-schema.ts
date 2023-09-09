@@ -1,9 +1,9 @@
 import { InferType, object, string } from "yup";
 
-const resetPasswordSchema = object({
+const emailSchema = object({
     body: object({
         email: string().required("'email' wymagane").email("email niepoprawny"),
     }),
 });
-export type ResetEmailData = InferType<typeof resetPasswordSchema>;
-export default resetPasswordSchema;
+export type EmailData = InferType<typeof emailSchema>;
+export default emailSchema;
