@@ -1,18 +1,18 @@
 import { Request, Response, Router } from "express";
 import Controller from "../interfaces/controller-interface";
+import authMiddleware, { ReqUser } from "../middleware/auth-middleware";
 import createGroupSchema, {
     CreateGroupData,
 } from "../middleware/schemas/group/create_group_schema";
-import authMiddleware, { ReqUser } from "../middleware/auth-middleware";
-import catchError from "../utils/catch-error";
-import Group from "../models/group/group";
 import validate from "../middleware/validate-middleware";
+import GroupModel from "../models/group/group";
 import { GroupPermission } from "../models/group/group_interface";
+import catchError from "../utils/catch-error";
 
 class GroupController implements Controller {
     public router = Router();
     public path = "/group";
-    private readonly group = Group;
+    private readonly group = GroupModel;
 
     constructor() {
         this.initializeRoutes();
@@ -40,9 +40,7 @@ class GroupController implements Controller {
         group.members.push({ member: req.user.data, permission: GroupPermission.ADMIN });
         await group.save();
 
-        
-
-        res.send({message: "Udało się stworzyć grupę"});
+        res.send({ message: "Udało się stworzyć grupę" });
     };
 }
 export default GroupController;

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { verify } from "jsonwebtoken";
-import AuthenticationToken from "../models/tokens/authentication-token/authentication-token";
+import AuthenticationTokenModel from "../models/tokens/authentication-token/authentication-token";
 import { DataStoredInToken } from "../models/tokens/authentication-token/authentication-token-interface";
 
 import AuthenticationTokenMissingException from "./exceptions/authentication-token-missing-exception";
@@ -24,7 +24,7 @@ function authMiddleware(
                 if (err) {
                     next(new WrongAuthenticationTokenException());
                 } else {
-                    const isExist = await AuthenticationToken.exists({ token: bearer });
+                    const isExist = await AuthenticationTokenModel.exists({ token: bearer });
 
                     if (isExist) {
                         request.user = decoded as DataStoredInToken;

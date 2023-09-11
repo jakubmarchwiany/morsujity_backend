@@ -24,13 +24,12 @@ import resetPasswordSchema, {
     NewPasswordData,
 } from "../middleware/schemas/auth/reset-password-schema";
 import validate from "../middleware/validate-middleware";
-import TmpUser from "../models/tmp-user/tmp-user-model";
-import AuthenticationToken from "../models/tokens/authentication-token/authentication-token";
+import TmpUserModel from "../models/tmp-user/tmp-user-model";
+import AuthenticationTokenModel from "../models/tokens/authentication-token/authentication-token";
 import { DataStoredInToken } from "../models/tokens/authentication-token/authentication-token-interface";
-import PasswordResetToken from "../models/tokens/password-reset-token/password-reset-token-model";
-import UserData from "../models/user-data/user-data-model";
-import { IUser } from "../models/user/user-interface";
-import User from "../models/user/user-model";
+import PasswordResetTokenModel from "../models/tokens/password-reset-token/password-reset-token-model";
+import UserDataModel from "../models/user-data/user-data-model";
+import UserModel from "../models/user/user-model";
 import catchError from "../utils/catch-error";
 import MailBot from "../utils/mail-bot";
 
@@ -39,11 +38,11 @@ const { JWT_SECRET, AUTHENTICATION_TOKEN_EXPIRE_AFTER, USER_APP_DOMAIN } = proce
 class AuthenticationController implements Controller {
     public router = Router();
     public path = "/auth";
-    private readonly user = User;
-    private readonly userData = UserData;
-    private readonly tmpUser = TmpUser;
-    private readonly authenticationToken = AuthenticationToken;
-    private readonly passwordResetToken = PasswordResetToken;
+    private readonly user = UserModel;
+    private readonly userData = UserDataModel;
+    private readonly tmpUser = TmpUserModel;
+    private readonly authenticationToken = AuthenticationTokenModel;
+    private readonly passwordResetToken = PasswordResetTokenModel;
     private readonly mailBot = new MailBot();
 
     constructor() {
@@ -93,7 +92,10 @@ class AuthenticationController implements Controller {
                     password: hashedPassword,
                 });
 
-                await this.mailBot.sendMailEmailUserVerification(tmpUser.email, tmpUser._id);
+                await this.mailBot.sendMailEmailUserVerification(
+                    tmpUser.email,
+                    tmpUser._id.toString()
+                );
                 await tmpUser.save({ session });
 
                 await session.commitTransaction();
@@ -104,7 +106,7 @@ class AuthenticationController implements Controller {
                 await session.abortTransaction();
                 throw new HttpException(400, "Nie udało się utworzyć konta");
             } finally {
-                session.endSession();
+                await session.endSession();
             }
         }
     };
@@ -139,7 +141,7 @@ class AuthenticationController implements Controller {
                 await session.abortTransaction();
                 throw new HttpException(400, "Nie udało się zweryfikować e-mail");
             } finally {
-                session.endSession();
+                await session.endSession();
             }
         } else {
             throw new EmailVerificationNotFoundOrExpired();
@@ -148,8 +150,7 @@ class AuthenticationController implements Controller {
 
     private readonly loggingIn = async (
         req: Request<never, never, LoginUserData["body"]>,
-        res: Response,
-        next: NextFunction
+        res: Response
     ) => {
         const { email, password } = req.body;
         const user = await this.user.findOne({ email }).lean();
@@ -157,7 +158,10 @@ class AuthenticationController implements Controller {
             const isPasswordMatching = await bcrypt.compare(password, user.password);
 
             if (isPasswordMatching) {
-                const tokenString = this.createAuthenticationToken(user);
+                const tokenString = this.createAuthenticationToken(
+                    user._id.toString(),
+                    user.data.toString()
+                );
                 await this.authenticationToken.create({ token: tokenString, owner: user._id });
 
                 const expiresIn = parseInt(AUTHENTICATION_TOKEN_EXPIRE_AFTER);
@@ -167,32 +171,33 @@ class AuthenticationController implements Controller {
                     message: "Udało się zalogować",
                 });
             } else {
-                next(new WrongCredentialsException());
+                throw new WrongCredentialsException();
             }
         } else {
-            next(
-                new HttpException(
-                    400,
-                    `Konto nie istnieje lub jest nieaktywne. Sprawdź mail: ${email}`
-                )
+            throw new HttpException(
+                400,
+                `Konto nie istnieje lub jest nieaktywne. Sprawdź mail: ${email}`
             );
         }
     };
 
-    private createAuthenticationToken(user: IUser): string {
+    private createAuthenticationToken(userID: string, dataID: string): string {
         const expiresIn = parseInt(AUTHENTICATION_TOKEN_EXPIRE_AFTER);
-
         const dataStoredInToken: DataStoredInToken = {
-            _id: user._id,
-            data: `${user.data}`,
+            _id: userID,
+            data: dataID,
         };
 
         return jwt.sign(dataStoredInToken, JWT_SECRET, { expiresIn });
     }
 
     private readonly logOut = async (req: Request, res: Response) => {
-        const bearerHeader = req.headers["authorization"].substring(7);
-        await this.authenticationToken.deleteOne({ token: bearerHeader });
+        const bearerHeader = req.headers["authorization"]!.substring(7);
+        const response = await this.authenticationToken.deleteOne({ token: bearerHeader });
+
+        if (response.deletedCount == 0)
+            throw new HttpException(400, `Token autoryzacyjny nie istnieje`);
+
         res.send({ message: "Udało się wylogować" });
     };
 
@@ -218,7 +223,7 @@ class AuthenticationController implements Controller {
                 await session.abortTransaction();
             } finally {
                 res.send({ message: "Email resetujący hasło został wysłany" });
-                session.endSession();
+                await session.endSession();
             }
         }
     };
@@ -266,7 +271,7 @@ class AuthenticationController implements Controller {
                 res.send({ message: "Nie udało się zresetować hasła" });
                 await session.abortTransaction();
             } finally {
-                session.endSession();
+                await session.endSession();
             }
         }
     };
@@ -278,29 +283,32 @@ class AuthenticationController implements Controller {
         const { newPassword, oldPassword } = req.body;
 
         const user = await this.user.findById(req.user._id, { password: 1 });
+        if (user) {
+            const isPasswordMatching = await bcrypt.compare(oldPassword, user.password);
+            if (isPasswordMatching) {
+                user.password = await bcrypt.hash(newPassword, 10);
 
-        const isPasswordMatching = await bcrypt.compare(oldPassword, user.password);
-        if (isPasswordMatching) {
-            user.password = await bcrypt.hash(newPassword, 10);
+                const session = await startSession();
 
-            const session = await startSession();
+                try {
+                    session.startTransaction();
 
-            try {
-                session.startTransaction();
+                    await user.save({ session });
+                    await this.authenticationToken.deleteMany({ owner: req.user._id }, { session });
 
-                await user.save({ session });
-                await this.authenticationToken.deleteMany({ owner: req.user._id }, { session });
-
-                res.send({ message: "Hasło zostało zmienione" });
-                await session.commitTransaction();
-            } catch (error) {
-                res.send({ message: "Nie udało się zmienić hasła" });
-                await session.abortTransaction();
-            } finally {
-                session.endSession();
+                    res.send({ message: "Hasło zostało zmienione" });
+                    await session.commitTransaction();
+                } catch (error) {
+                    res.send({ message: "Nie udało się zmienić hasła" });
+                    await session.abortTransaction();
+                } finally {
+                    await session.endSession();
+                }
+            } else {
+                throw new WrongCredentialsException();
             }
         } else {
-            throw new WrongCredentialsException();
+            throw new HttpException(400, "Użytkownik nie znaleziony");
         }
     };
 }

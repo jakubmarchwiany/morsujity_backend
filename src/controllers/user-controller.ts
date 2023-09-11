@@ -1,4 +1,5 @@
 import { Request, Response, Router } from "express";
+import { startSession } from "mongoose";
 import Controller from "../interfaces/controller-interface";
 import authMiddleware, { ReqUser } from "../middleware/auth-middleware";
 import HttpException from "../middleware/exceptions/http-exception";
@@ -12,18 +13,17 @@ import changePseudonymSchema, {
     ChangePseudonymData,
 } from "../middleware/schemas/user/change-pseudonym-schema";
 import validate from "../middleware/validate-middleware";
-import { IActivity } from "../models/user-data/statistic/activity-interface";
-import UserData from "../models/user-data/user-data-model";
-import User from "../models/user/user-model";
+import { Statistics } from "../models/user-data/statistic/statistics-interface";
+import UserDataModel from "../models/user-data/user-data-model";
+import UserModel from "../models/user/user-model";
 import catchError from "../utils/catch-error";
 import GoogleBot from "../utils/google-bot";
-import { rankDown, rankUp } from "../utils/rank-logic";
 
 class UserController implements Controller {
     public router = Router();
     public path = "/user";
-    private readonly user = User;
-    private readonly userData = UserData;
+    private readonly user = UserModel;
+    private readonly userData = UserDataModel;
     private readonly imageBot = new GoogleBot();
 
     constructor() {
@@ -79,7 +79,7 @@ class UserController implements Controller {
             })
             .lean();
         res.send({
-            activity: userData.statistics.activity,
+            activity: userData!.statistics.activity,
             message: "Udało się pobrać wszystkie aktywności",
         });
     };
@@ -89,48 +89,83 @@ class UserController implements Controller {
         res: Response
     ) => {
         const { pseudonym } = req.body;
-        await this.userData.findByIdAndUpdate(req.user.data, { pseudonym });
+
+        const result = await this.userData.updateOne(
+            { _id: req.user.data },
+            { $set: { pseudonym: pseudonym } }
+        );
+
+        if (result.modifiedCount == 0) throw new HttpException(400, "Ta sama nazwa użytkownika");
+
         res.send({ message: "Udało się zaktualizować ksywkę" });
     };
 
-    private readonly changeUserImage = async (req: Request & ReqUser, res: Response) => {
-        const fileName = await this.imageBot.saveNewUserImage(req.file);
-        const user = await this.userData.findById(req.user.data, { image: 1 });
+    private readonly changeUserImage = async (
+        req: Request & ReqUser & { file: Express.Multer.File },
+        res: Response
+    ) => {
+        const session = await startSession();
 
-        if (user.image !== "def") {
-            await this.imageBot.deleteUserImage(user.image);
+        try {
+            session.startTransaction();
+            const fileName = await this.imageBot.saveNewUserImage(req.file);
+            const user = await this.userData.findById(req.user.data, { image: 1 });
+
+            if (user!.image !== "def") {
+                await this.imageBot.deleteUserImage(user!.image);
+            }
+
+            user!.image = fileName;
+            await user!.save({ session });
+
+            await session.commitTransaction();
+            res.send({
+                message: "Udało się zaktualizować zdjęcie",
+                image: user!.image,
+            });
+        } catch (error) {
+            await session.abortTransaction();
+            throw new HttpException(500, "Nie udało się zaktualizować zdjęcie");
+        } finally {
+            await session.endSession();
         }
-        user.image = fileName;
-        await user.save();
-        res.send({
-            message: "Udało się zaktualizować zdjęcie",
-            image: user.image,
-        });
     };
 
     private readonly changeUserImageToDef = async (req: Request & ReqUser, res: Response) => {
-        const user = await this.userData.findById(req.user.data, { image: 1 });
+        const session = await startSession();
 
-        if (user.image === "def")
-            return res.send({ message: "Użytkownik ma już domyślne zdjęcie" });
+        try {
+            const user = await this.userData.findById(req.user.data, { image: 1 });
+            if (user!.image === "def")
+                return res.send({ message: "Użytkownik ma już domyślne zdjęcie" });
 
-        await this.imageBot.deleteUserImage(user.image);
+            await this.imageBot.deleteUserImage(user!.image);
 
-        user.image = "def";
-        await user.save();
-        res.send({
-            message: "Udało ustawić domyślne zdjęcie",
-            image: user.image,
-        });
+            user!.image = "def";
+            await user!.save({ session });
+
+            await session.commitTransaction();
+            res.send({
+                message: "Udało ustawić domyślne zdjęcie",
+                image: user!.image,
+            });
+        } catch (error) {
+            await session.abortTransaction();
+            throw new HttpException(400, "Nie udało się ustawić domyślnego zdjęcia");
+        } finally {
+            await session.endSession();
+        }
     };
 
     private readonly newActivity = async (
         req: Request<never, never, NewActivityData["body"]> & ReqUser,
         res: Response
     ) => {
-        const { isMors, duration, date } = req.body;
+        const { activityType, duration, date } = req.body;
 
-        const s = await this.userData.findById(req.user.data, {
+        console.log(req.body);
+
+        const resData = await this.userData.findById(req.user.data, {
             "statistics.rank": 1,
             "statistics.subRank": 1,
             "statistics.timeMorses": 1,
@@ -138,34 +173,38 @@ class UserController implements Controller {
             "statistics.activity": { $slice: 0 },
         });
 
-        const statistics = s.statistics;
-        const activity: IActivity = { isMors, duration, date };
+        let statistic = resData?.statistics;
 
-        statistics.activity.push(activity);
+        // const statistics = resData.statistics;
+        // const activity: IActivity = { activityType, duration, date };
 
-        if (isMors) statistics.timeMorses += duration;
-        else statistics.timeColdShowers += duration;
+        // statistics.activity.push(activity);
 
-        const { timeColdShowers, timeMorses } = statistics;
-        const sumTime = timeColdShowers + timeMorses;
+        // statistics.
 
-        [statistics.rank, statistics.subRank] = rankUp(
-            statistics.rank,
-            statistics.subRank,
-            sumTime
-        );
+        // if (isMors) statistics.timeMorses += duration;
+        // else statistics.timeColdShowers += duration;
 
-        await s.save();
+        // const { timeColdShowers, timeMorses } = statistics;
+        // const sumTime = timeColdShowers + timeMorses;
 
-        const data = {
-            rank: statistics.rank,
-            subRank: statistics.subRank,
-            timeColdShowers: s.statistics.timeColdShowers,
-            timeMorses: s.statistics.timeMorses,
-            activity: statistics.activity[0],
-        };
+        // [statistics.rank, statistics.subRank] = rankUp(
+        //     statistics.rank,
+        //     statistics.subRank,
+        //     sumTime
+        // );
 
-        res.send({ message: "Udało się dodać aktywność", data });
+        // await s.save();
+
+        // const data = {
+        //     rank: statistics.rank,
+        //     subRank: statistics.subRank,
+        //     timeColdShowers: s.statistics.timeColdShowers,
+        //     timeMorses: s.statistics.timeMorses,
+        //     activity: statistics.activity[0],
+        // };
+
+        res.send({ message: "Udało się dodać aktywność" });
     };
 
     private readonly deleteActivity = async (
@@ -174,68 +213,68 @@ class UserController implements Controller {
     ) => {
         const { activityID } = req.body;
 
-        const s = await this.userData.findOne(
-            { _id: req.user.data, "statistics.activity._id": activityID },
-            {
-                "statistics.activity.$": 1,
-                "statistics.rank": 1,
-                "statistics.subRank": 1,
-                "statistics.timeColdShowers": 1,
-                "statistics.timeMorses": 1,
-            }
-        );
+        // const s = await this.userData.findOne(
+        //     { _id: req.user.data, "statistics.activity._id": activityID },
+        //     {
+        //         "statistics.activity.$": 1,
+        //         "statistics.rank": 1,
+        //         "statistics.subRank": 1,
+        //         "statistics.timeColdShowers": 1,
+        //         "statistics.timeMorses": 1,
+        //     }
+        // );
 
-        if (s === null) throw new HttpException(400, "Nie znaleziono aktywności o podanym ID");
+        // if (s === null) throw new HttpException(400, "Nie znaleziono aktywności o podanym ID");
 
-        const statistics = s.statistics;
-        const activity = statistics.activity[0];
+        // const statistics = s.statistics;
+        // const activity = statistics.activity[0];
 
-        if (activity.isMors) statistics.timeMorses -= activity.duration;
-        else statistics.timeColdShowers -= activity.duration;
+        // if (activity.isMors) statistics.timeMorses -= activity.duration;
+        // else statistics.timeColdShowers -= activity.duration;
 
-        const { timeColdShowers, timeMorses } = s.statistics;
-        const sumTime = timeColdShowers + timeMorses;
+        // const { timeColdShowers, timeMorses } = s.statistics;
+        // const sumTime = timeColdShowers + timeMorses;
 
-        [statistics.rank, statistics.subRank] = rankDown(
-            statistics.rank,
-            statistics.subRank,
-            sumTime
-        );
+        // [statistics.rank, statistics.subRank] = rankDown(
+        //     statistics.rank,
+        //     statistics.subRank,
+        //     sumTime
+        // );
 
-        if (activity.isMors) {
-            await this.userData.updateOne(
-                { _id: req.user.data },
-                {
-                    $pull: { "statistics.activity": { _id: activityID } },
-                    $set: {
-                        "statistics.rank": statistics.rank,
-                        "statistics.subRank": statistics.subRank,
-                        "statistics.timeMorses": s.statistics.timeMorses,
-                    },
-                }
-            );
-        } else {
-            await this.userData.updateOne(
-                { _id: req.user.data },
-                {
-                    $pull: { "statistics.activity": { _id: activityID } },
-                    $set: {
-                        "statistics.rank": statistics.rank,
-                        "statistics.subRank": statistics.subRank,
-                        "statistics.timeColdShowers": s.statistics.timeColdShowers,
-                    },
-                }
-            );
-        }
-        console.log(statistics.rank, statistics.subRank);
-        const data = {
-            rank: statistics.rank,
-            subRank: statistics.subRank,
-            timeColdShowers: s.statistics.timeColdShowers,
-            timeMorses: s.statistics.timeMorses,
-        };
+        // if (activity.isMors) {
+        //     await this.userData.updateOne(
+        //         { _id: req.user.data },
+        //         {
+        //             $pull: { "statistics.activity": { _id: activityID } },
+        //             $set: {
+        //                 "statistics.rank": statistics.rank,
+        //                 "statistics.subRank": statistics.subRank,
+        //                 "statistics.timeMorses": s.statistics.timeMorses,
+        //             },
+        //         }
+        //     );
+        // } else {
+        //     await this.userData.updateOne(
+        //         { _id: req.user.data },
+        //         {
+        //             $pull: { "statistics.activity": { _id: activityID } },
+        //             $set: {
+        //                 "statistics.rank": statistics.rank,
+        //                 "statistics.subRank": statistics.subRank,
+        //                 "statistics.timeColdShowers": s.statistics.timeColdShowers,
+        //             },
+        //         }
+        //     );
+        // }
+        // console.log(statistics.rank, statistics.subRank);
+        // const data = {
+        //     rank: statistics.rank,
+        //     subRank: statistics.subRank,
+        //     timeColdShowers: s.statistics.timeColdShowers,
+        //     timeMorses: s.statistics.timeMorses,
+        // };
 
-        res.send({ message: "Udało się usunąć aktywność", data });
+        // res.send({ message: "Udało się usunąć aktywność", data });
     };
 }
 export default UserController;
