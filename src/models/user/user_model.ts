@@ -1,5 +1,5 @@
 import { HydratedDocument, InferSchemaType, model, Schema } from "mongoose";
-import { UserStatus, UserType } from "./user-interface";
+import { UserStatus, UserType } from "./user_interface";
 
 const userSchema = new Schema(
     {

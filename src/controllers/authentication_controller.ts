@@ -4,34 +4,34 @@ import jwt from "jsonwebtoken";
 import { startSession } from "mongoose";
 import sha256 from "sha256";
 import { v4 as uuidv4 } from "uuid";
-import Controller from "../interfaces/controller-interface";
-import authMiddleware, { ReqUser } from "../middleware/auth-middleware";
-import EmailVerificationNotFoundOrExpired from "../middleware/exceptions/email-verification-not-found-or-expired-exception";
-import HttpException from "../middleware/exceptions/http-exception";
-import UserWithThatEmailAlreadyExistsException from "../middleware/exceptions/user-with-that-email-already-exists-exception";
-import WrongAuthenticationTokenException from "../middleware/exceptions/wrong-authentication-token-exception";
-import WrongCredentialsException from "../middleware/exceptions/wrong-credentials-exception";
+import Controller from "../interfaces/controller_interface";
+import authMiddleware, { ReqUser } from "../middleware/auth_middleware";
+import EmailVerificationNotFoundOrExpired from "../middleware/exceptions/email_verification_not_found_or_expired_exception";
+import HttpException from "../middleware/exceptions/http_exception";
+import UserWithThatEmailAlreadyExistsException from "../middleware/exceptions/user_with_that_email_already_exists_exception";
+import WrongAuthenticationTokenException from "../middleware/exceptions/wrong_authentication_token_exception";
+import WrongCredentialsException from "../middleware/exceptions/wrong_credentials_exception";
 import changePasswordSchema, {
     ChangePasswordData,
-} from "../middleware/schemas/auth/change-password-schema";
-import emailSchema, { EmailData } from "../middleware/schemas/auth/email-schema";
-import emailTokenSchema, { EmailTokenData } from "../middleware/schemas/auth/email-token-schema";
-import loginUserSchema, { LoginUserData } from "../middleware/schemas/auth/login-user-schema";
+} from "../middleware/schemas/auth/change_password_schema";
+import emailSchema, { EmailData } from "../middleware/schemas/auth/email_schema";
+import emailTokenSchema, { EmailTokenData } from "../middleware/schemas/auth/email_token_schema";
+import loginUserSchema, { LoginUserData } from "../middleware/schemas/auth/login_user_schema";
 import registerUserSchema, {
     RegisterUserData,
-} from "../middleware/schemas/auth/register-user-schema";
+} from "../middleware/schemas/auth/register_user_schema";
 import resetPasswordSchema, {
     NewPasswordData,
-} from "../middleware/schemas/auth/reset-password-schema";
-import validate from "../middleware/validate-middleware";
-import TmpUserModel from "../models/tmp-user/tmp-user-model";
-import AuthenticationTokenModel from "../models/tokens/authentication-token/authentication-token";
-import { DataStoredInToken } from "../models/tokens/authentication-token/authentication-token-interface";
-import PasswordResetTokenModel from "../models/tokens/password-reset-token/password-reset-token-model";
-import UserDataModel from "../models/user-data/user-data-model";
-import UserModel from "../models/user/user-model";
-import catchError from "../utils/catch-error";
-import MailBot from "../utils/mail-bot";
+} from "../middleware/schemas/auth/reset_password_schema";
+import validate from "../middleware/validate_middleware";
+import TmpUserModel from "../models/tmp_user/tmp_user_model";
+import AuthenticationTokenModel from "../models/tokens/authentication_token/authentication_token";
+import { DataStoredInToken } from "../models/tokens/authentication_token/authentication_token_interface";
+import PasswordResetTokenModel from "../models/tokens/password_reset_token/password_reset_token_model";
+import UserDataModel from "../models/user_data/user_data_model";
+import UserModel from "../models/user/user_model";
+import catchError from "../utils/catch_error";
+import MailBot from "../utils/mail_bot";
 
 const { JWT_SECRET, AUTHENTICATION_TOKEN_EXPIRE_AFTER, USER_APP_DOMAIN } = process.env;
 

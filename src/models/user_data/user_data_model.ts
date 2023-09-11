@@ -1,5 +1,5 @@
 import { InferSchemaType, model, Schema } from "mongoose";
-import statisticsSchema from "./statistic/statistics-interface";
+import statisticsSchema from "./statistic/statistics_interface";
 
 const { DEF_USER_IMAGE } = process.env;
 

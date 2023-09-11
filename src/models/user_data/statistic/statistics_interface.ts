@@ -1,7 +1,7 @@
 import { InferSchemaType, Schema } from "mongoose";
-import { activitySchema } from "./activity-interface";
-import { rankSchema } from "./rank-interface";
-import { firstRank, firstSubRank } from "./ranks-data";
+import { activitySchema } from "./activity_interface";
+import { rankSchema } from "./rank_interface";
+import { firstRank, firstSubRank } from "./ranks_data";
 
 const statisticsSchema = new Schema(
     {

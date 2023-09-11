@@ -1,23 +1,23 @@
 import { Request, Response, Router } from "express";
 import { startSession } from "mongoose";
-import Controller from "../interfaces/controller-interface";
-import authMiddleware, { ReqUser } from "../middleware/auth-middleware";
-import HttpException from "../middleware/exceptions/http-exception";
+import Controller from "../interfaces/controller_interface";
+import authMiddleware, { ReqUser } from "../middleware/auth_middleware";
+import HttpException from "../middleware/exceptions/http_exception";
 import deleteActivitySchema, {
     DeleteActivityData,
-} from "../middleware/schemas/activity/delete-activity-schema";
+} from "../middleware/schemas/activity/delete_activity_schema";
 import newActivitySchema, {
     NewActivityData,
-} from "../middleware/schemas/activity/new-activity-schema";
+} from "../middleware/schemas/activity/new_activity_schema";
 import changePseudonymSchema, {
     ChangePseudonymData,
-} from "../middleware/schemas/user/change-pseudonym-schema";
-import validate from "../middleware/validate-middleware";
-import { Statistics } from "../models/user-data/statistic/statistics-interface";
-import UserDataModel from "../models/user-data/user-data-model";
-import UserModel from "../models/user/user-model";
-import catchError from "../utils/catch-error";
-import GoogleBot from "../utils/google-bot";
+} from "../middleware/schemas/user/change_pseudonym_schema";
+import validate from "../middleware/validate_middleware";
+import { Statistics } from "../models/user_data/statistic/statistics_interface";
+import UserDataModel from "../models/user_data/user_data_model";
+import UserModel from "../models/user/user_model";
+import catchError from "../utils/catch_error";
+import GoogleBot from "../utils/google_bot";
 
 class UserController implements Controller {
     public router = Router();

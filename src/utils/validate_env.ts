@@ -1,9 +1,5 @@
 import { cleanEnv, num, port, str } from "envalid";
 
-import dotenv from "dotenv";
-import { number } from "yup";
-dotenv.config();
-
 function validateEnv() {
     cleanEnv(process.env, {
         PORT: port(),

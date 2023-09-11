@@ -1,4 +1,4 @@
-import { Rank } from "./rank-interface";
+import { Rank } from "./rank_interface";
 
 export const RANKS: Rank[] = [
     {

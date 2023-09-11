@@ -3,25 +3,27 @@ import compression from "compression";
 import cookieParser from "cookie-parser";
 import cors, { CorsOptions } from "cors";
 import express, { NextFunction, Request, Response } from "express";
+import rateLimiter from "express-rate-limit";
 import mongoose from "mongoose";
-import Controller from "./interfaces/controller-interface";
-import errorMiddleware from "./middleware/error-middleware";
-import HttpException from "./middleware/exceptions/http-exception";
-import rateLimiter from "express-rate-limit"
+import Controller from "./interfaces/controller_interface";
+import errorMiddleware from "./middleware/error_middleware";
+import HttpException from "./middleware/exceptions/http_exception";
 
 const { PORT, MONGO_URL, WHITELISTED_DOMAINS } = process.env;
 
 const rateLimit = rateLimiter({
-	max: 100, // the rate limit in reqs
-	windowMs: 1 * 60 * 1000, // time where limit applies
+    max: 100, // the rate limit in reqs
+    windowMs: 1 * 60 * 1000, // time where limit applies
     handler: (request, response, next, options) =>
-		response.status(options.statusCode).send({message: "Za dużo zapytań, spróbuj ponownie za chwilę"}),
+        response
+            .status(options.statusCode)
+            .send({ message: "Za dużo zapytań, spróbuj ponownie za chwilę" }),
 });
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const fakeLoading = async function (req: Request, res: Response, next: NextFunction) {
-    await sleep(2000);
+    await sleep(0);
     next();
 };
 
@@ -30,7 +32,7 @@ class Server {
 
     constructor(controllers: Controller[]) {
         this.app = express();
-        // this.app.use(fakeLoading);
+        this.app.use(fakeLoading);
         this.connectToTheDatabase();
         this.initializeCors();
         this.initializeMiddlewares();
@@ -58,13 +60,13 @@ class Server {
             })
         );
         this.app.use(cookieParser());
-        this.app.use(rateLimit)
+        this.app.use(rateLimit);
     }
 
     private initializeCors() {
         const corsOptions: CorsOptions = {
             origin: function (origin, callback) {
-                if (WHITELISTED_DOMAINS.split(",").indexOf(origin) !== -1 || !origin) {
+                if (WHITELISTED_DOMAINS.split(",").indexOf(origin!) !== -1 || !origin) {
                     callback(null, true);
                 } else {
                     callback(new Error("Not allowed by CORS"));

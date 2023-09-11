@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { Schema } from "yup";
 
-import HttpException from "./exceptions/http-exception";
+import HttpException from "./exceptions/http_exception";
 
 function validate(schema: Schema) {
     return (req: Request, res: Response, next: NextFunction) => {

@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { verify } from "jsonwebtoken";
-import AuthenticationTokenModel from "../models/tokens/authentication-token/authentication-token";
-import { DataStoredInToken } from "../models/tokens/authentication-token/authentication-token-interface";
+import AuthenticationTokenModel from "../models/tokens/authentication_token/authentication_token";
+import { DataStoredInToken } from "../models/tokens/authentication_token/authentication_token_interface";
 
-import AuthenticationTokenMissingException from "./exceptions/authentication-token-missing-exception";
-import WrongAuthenticationTokenException from "./exceptions/wrong-authentication-token-exception";
+import AuthenticationTokenMissingException from "./exceptions/authentication_token_missing_exception";
+import WrongAuthenticationTokenException from "./exceptions/wrong_authentication_token_exception";
 
 const { JWT_SECRET } = process.env;
 

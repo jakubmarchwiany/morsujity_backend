@@ -1,5 +1,5 @@
-import { Rank } from "../models/user-data/statistic/rank-interface";
-import { RANKS, SUBRANKS } from "../models/user-data/statistic/ranks-data";
+import { Rank } from "../models/user_data/statistic/rank_interface";
+import { RANKS, SUBRANKS } from "../models/user_data/statistic/ranks_data";
 
 export function rankUp(currentRank: Rank, currentSubRank: Rank, totalTime: number) {
     let newRanks: [Rank, Rank] = [currentRank, currentSubRank];

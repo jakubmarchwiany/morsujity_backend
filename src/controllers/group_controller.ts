@@ -1,13 +1,13 @@
 import { Request, Response, Router } from "express";
-import Controller from "../interfaces/controller-interface";
-import authMiddleware, { ReqUser } from "../middleware/auth-middleware";
+import Controller from "../interfaces/controller_interface";
+import authMiddleware, { ReqUser } from "../middleware/auth_middleware";
 import createGroupSchema, {
     CreateGroupData,
 } from "../middleware/schemas/group/create_group_schema";
-import validate from "../middleware/validate-middleware";
+import validate from "../middleware/validate_middleware";
 import GroupModel from "../models/group/group";
 import { GroupPermission } from "../models/group/group_interface";
-import catchError from "../utils/catch-error";
+import catchError from "../utils/catch_error";
 
 class GroupController implements Controller {
     public router = Router();

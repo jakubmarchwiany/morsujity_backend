@@ -1,8 +1,8 @@
-import AuthenticationController from "./controllers/authentication-controller";
+import AuthenticationController from "./controllers/authentication_controller";
 import GroupController from "./controllers/group_controller";
-import UserController from "./controllers/user-controller";
+import UserController from "./controllers/user_controller";
 import Server from "./server";
-import validateEnv from "./utils/validate-env";
+import validateEnv from "./utils/validate_env";
 
 validateEnv();
 
