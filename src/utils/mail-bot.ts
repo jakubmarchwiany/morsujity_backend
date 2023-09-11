@@ -1,18 +1,11 @@
 import fs from "fs";
 import handlebars from "handlebars";
+import { ObjectId, Schema } from "mongoose";
 import nodemailer, { Transporter } from "nodemailer";
 import smtpTransport from "nodemailer-smtp-transport";
 import path from "path";
 
 const { FRONT_URL_ADDRESS, MAIL_HOST, MAIL_PORT, MAIL_PASS, MAIL_USER, MAIL_FROM } = process.env;
-
-// const { AWS_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_SENDER_ADDRESS } = process.env;
-
-// aws.config.update({
-//     accessKeyId: AWS_ACCESS_KEY_ID,
-//     secretAccessKey: AWS_ACCESS_KEY,
-//     region: "eu-central-1",
-// });
 
 class MailBot {
     private transporter!: Transporter;
@@ -33,12 +26,6 @@ class MailBot {
                     },
                 })
             );
-
-            // this.transporter = nodemailer.createTransport({
-            //     SES: new aws.SES({
-            //         apiVersion: "2010-12-01",
-            //     }),
-            // });
         } catch (e) {
             setTimeout(() => {
                 this.createTransport();
