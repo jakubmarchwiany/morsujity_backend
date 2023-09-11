@@ -1,8 +1,8 @@
-import { IRank } from "../models/user-data/statistic/rank-interface";
-import { RANKS as RANKS, SUBRANKS } from "../models/user-data/statistic/ranks-data";
+import { Rank } from "../models/user-data/statistic/rank-interface";
+import { RANKS, SUBRANKS } from "../models/user-data/statistic/ranks-data";
 
-export function rankUp(currentRank: IRank, currentSubRank: IRank, totalTime: number) {
-    let newRanks = [];
+export function rankUp(currentRank: Rank, currentSubRank: Rank, totalTime: number) {
+    let newRanks: [Rank, Rank] = [currentRank, currentSubRank];
     for (let i = currentRank.N; i < RANKS.length; i++) {
         if (totalTime < RANKS[i].maxValue) {
             newRanks[0] = RANKS[i];
@@ -20,9 +20,8 @@ export function rankUp(currentRank: IRank, currentSubRank: IRank, totalTime: num
     return newRanks;
 }
 
-export function rankDown(currentRank: IRank, currentSubRank: IRank, totalTime: number) {
-    let newRanks = [];
-    console.log(currentRank, currentSubRank, totalTime);
+export function rankDown(currentRank: Rank, currentSubRank: Rank, totalTime: number) {
+    let newRanks: [Rank, Rank] = [currentRank, currentSubRank];
 
     for (let i = currentRank.N; i >= 0; i--) {
         if (totalTime >= RANKS[i].maxValue || i == 0) {
