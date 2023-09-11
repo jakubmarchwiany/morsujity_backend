@@ -1,13 +1,12 @@
-import { model, Schema } from "mongoose";
-import ITmpUser from "./tmp-user-interface";
+import { InferSchemaType, model, Schema } from "mongoose";
 
 const { USER_EXPIRE_AFTER } = process.env;
 
-const tmpUserSchema = new Schema<ITmpUser>({
+const tmpUserSchema = new Schema({
     email: { type: String, required: true },
     password: { type: String, required: true },
     pseudonym: { type: String, required: true },
-    expireIn: { type: Date, default: new Date() },
+    expireIn: { type: Date, default: new Date(), required: true },
 });
 
 tmpUserSchema.index(
@@ -15,5 +14,7 @@ tmpUserSchema.index(
     { expireAfterSeconds: parseInt(USER_EXPIRE_AFTER), name: "expireIn" }
 );
 
-const TmpUser = model<ITmpUser>("TmpUser", tmpUserSchema);
-export default TmpUser;
+export type AuthenticationToken = InferSchemaType<typeof tmpUserSchema>;
+
+const TmpUserModel = model("TmpUser", tmpUserSchema);
+export default TmpUserModel;

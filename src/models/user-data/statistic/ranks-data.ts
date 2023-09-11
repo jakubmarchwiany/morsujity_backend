@@ -1,6 +1,6 @@
-import { IRank } from "./rank-interface";
+import { Rank } from "./rank-interface";
 
-export const RANKS: IRank[] = [
+export const RANKS: Rank[] = [
     {
         N: 0,
         name: "Żelazny Mors",
@@ -43,7 +43,7 @@ export const RANKS: IRank[] = [
     },
 ];
 
-export const SUBRANKS: IRank[] = [
+export const SUBRANKS: Rank[] = [
     {
         N: 0,
         name: "rybka",
@@ -176,13 +176,13 @@ export const SUBRANKS: IRank[] = [
     },
 ];
 
-export const firstRank: IRank = {
+export const firstRank: Rank = {
     N: RANKS[0].N,
     name: RANKS[0].name,
     maxValue: RANKS[0].maxValue,
 };
 
-export const firstSubRank: IRank = {
+export const firstSubRank: Rank = {
     N: SUBRANKS[0].N,
     name: SUBRANKS[0].name,
     maxValue: SUBRANKS[0].maxValue,

@@ -1,9 +1,9 @@
-import { model, Schema } from "mongoose";
-import { GroupModel, GroupPermission, GroupStatus, IGroup, IGroupMember } from "./group_interface";
+import { InferSchemaType, model, Schema } from "mongoose";
+import { GroupPermission, GroupStatus } from "./group_interface";
 
 const MemberSchema = new Schema({ name: String });
 
-const groupSchema = new Schema<IGroup, GroupModel>({
+const groupSchema = new Schema({
     status: { type: String, default: GroupStatus.ACTIVE },
     name: { type: String },
     description: { type: String },
@@ -18,5 +18,7 @@ const groupSchema = new Schema<IGroup, GroupModel>({
     ],
 });
 
-const Group = model<IGroup, GroupModel>("Group", groupSchema);
-export default Group;
+export type Group = InferSchemaType<typeof groupSchema>;
+
+const GroupModel = model("Group", groupSchema);
+export default GroupModel;

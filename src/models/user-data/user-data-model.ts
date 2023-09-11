@@ -1,15 +1,16 @@
-import { model, Schema } from "mongoose";
+import { InferSchemaType, model, Schema } from "mongoose";
 import statisticsSchema from "./statistic/statistics-interface";
-import { IUserData, UserDataModel } from "./user-data-interface";
 
 const { DEF_USER_IMAGE } = process.env;
 
-const userDataSchema = new Schema<IUserData, UserDataModel>({
+const userDataSchema = new Schema({
     pseudonym: { type: String, required: true },
-    image: { type: String, default: DEF_USER_IMAGE },
-    statistics: { type: statisticsSchema, default: () => ({}) },
-    createdIn: { type: Date, default: new Date() },
+    image: { type: String, default: DEF_USER_IMAGE, required: true },
+    statistics: { type: statisticsSchema, default: () => ({}), required: true },
+    createdIn: { type: Date, default: new Date(), required: true },
 });
 
-const UserData = model<IUserData, UserDataModel>("UserData", userDataSchema);
-export default UserData;
+export type UserData = InferSchemaType<typeof userDataSchema>;
+const UserDataModel = model("UserData", userDataSchema);
+
+export default UserDataModel;

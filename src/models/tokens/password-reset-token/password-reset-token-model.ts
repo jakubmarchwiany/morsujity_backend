@@ -1,9 +1,8 @@
-import { model, Schema } from "mongoose";
-import IPasswordResetToken from "./password-reset-token-interface";
+import { InferSchemaType, model, Schema } from "mongoose";
 
 const { RESET_PASSWORD_TOKEN_EXPIRE_AFTER } = process.env;
 
-const passwordResetTokenSchema = new Schema<IPasswordResetToken>({
+const passwordResetTokenSchema = new Schema({
     expireIn: {
         type: Date,
         default: new Date(),
@@ -24,8 +23,7 @@ passwordResetTokenSchema.index(
     }
 );
 
-const PasswordResetToken = model<IPasswordResetToken>(
-    "PasswordResetToken",
-    passwordResetTokenSchema
-);
-export default PasswordResetToken;
+export type PasswordResetToken = InferSchemaType<typeof passwordResetTokenSchema>;
+
+const PasswordResetTokenModel = model("PasswordResetToken", passwordResetTokenSchema);
+export default PasswordResetTokenModel;

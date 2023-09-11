@@ -1,58 +1,20 @@
-import { Schema } from "mongoose";
-import { activitySchema, IActivity } from "./activity-interface";
-import { IRank, rankSchema } from "./rank-interface";
+import { InferSchemaType, Schema } from "mongoose";
+import { activitySchema } from "./activity-interface";
+import { rankSchema } from "./rank-interface";
 import { firstRank, firstSubRank } from "./ranks-data";
 
-export interface IStatisticsMethods {
-    newActivity: () => void;
-    deleteActivity: () => void;
-}
-
-export interface IStatistics {
-    rank: IRank;
-    subRank: IRank;
-    timeMorses: number;
-    timeColdShowers: number;
-    activity: IActivity[];
-}
-
-const statisticsSchema = new Schema<IStatistics, IStatisticsMethods>(
+const statisticsSchema = new Schema(
     {
-        rank: { type: rankSchema, default: firstRank },
-        subRank: { type: rankSchema, default: firstSubRank },
-        timeMorses: { type: Number, default: 0 },
-        timeColdShowers: { type: Number, default: 0 },
-        activity: [activitySchema],
+        rank: { type: rankSchema, default: firstRank, require: true },
+        subRank: { type: rankSchema, default: firstSubRank, require: true },
+        timeMorses: { type: Number, default: 0, require: true },
+        timeColdShowers: { type: Number, default: 0, require: true },
+        activity: { type: [activitySchema], default: [], require: true },
     },
-    { _id: false }
+    {
+        _id: false,
+    }
 );
 
-statisticsSchema.methods.newActivity = function (activity: IActivity, isMors: boolean) {
-    if (activity.isMors) {
-        this.morses.push(activity);
-        this.totalTimeOfMorses += activity.duration;
-    } else {
-        this.coldShowers.push(activity);
-        this.totalTimeOfColdShowers += activity.duration;
-    }
-};
-
-statisticsSchema.methods.deleteActivity = function (
-    activityID: string,
-    activity: IActivity,
-    isMors: boolean
-) {
-    if (isMors) {
-        if (this.morses.id(activityID)) {
-            this.morses.pull({ _id: activityID });
-            this.totalTimeOfMorses += activity.duration;
-        }
-    } else {
-        if (this.coldShowers.id(activityID)) {
-            this.coldShowers.push(activity);
-            this.totalTimeOfColdShowers += activity.duration;
-        }
-    }
-};
-
+export type Statistics = InferSchemaType<typeof statisticsSchema>;
 export default statisticsSchema;

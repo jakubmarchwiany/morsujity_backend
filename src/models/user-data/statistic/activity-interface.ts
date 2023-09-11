@@ -1,14 +1,14 @@
-import { Schema } from "mongoose";
+import { InferSchemaType, Schema } from "mongoose";
 
-export interface IActivity {
-    _id?: string;
-    isMors: boolean;
-    duration: number;
-    date: Date;
+export enum ActivityTypes {
+    ColdShower,
+    WinterSwiming,
 }
 
-export const activitySchema = new Schema<IActivity>({
-    isMors: Boolean,
-    date: Date,
-    duration: Number,
+export const activitySchema = new Schema({
+    activityType: { type: String, required: true },
+    date: { type: Date, required: true },
+    duration: { type: Number, required: true },
 });
+
+export type Activity = InferSchemaType<typeof activitySchema>;

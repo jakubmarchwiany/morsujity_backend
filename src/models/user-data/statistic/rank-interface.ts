@@ -1,16 +1,12 @@
-import { Schema } from "mongoose";
+import { InferSchemaType, Schema } from "mongoose";
 
-export interface IRank {
-    N: number;
-    name: string;
-    maxValue: number;
-}
-
-export const rankSchema = new Schema<IRank>(
+export const rankSchema = new Schema(
     {
-        N: Number,
-        name: String,
-        maxValue: Number,
+        N: { type: Number, required: true },
+        name: { type: String, required: true },
+        maxValue: { type: Number, required: true },
     },
     { _id: false }
 );
+
+export type Rank = InferSchemaType<typeof rankSchema>;
