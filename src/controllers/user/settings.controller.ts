@@ -59,9 +59,9 @@ export class SettingsController implements Controller {
         res: Response
     ) => {
         const session = await startSession();
-
         try {
             session.startTransaction();
+
             const fileName = await this.imageBot.saveNewUserImage(req.file);
             const user = await this.userData.findById(req.user.data, { image: 1 });
 
@@ -87,8 +87,9 @@ export class SettingsController implements Controller {
 
     private readonly setImageToDef = async (req: Request & ReqUser, res: Response) => {
         const session = await startSession();
-
         try {
+            session.startTransaction();
+
             const user = await this.userData.findById(req.user.data, { image: 1 });
             if (user!.image === "def")
                 return res.send({ message: "Użytkownik ma już domyślne zdjęcie" });
