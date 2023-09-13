@@ -23,7 +23,7 @@ import { DataStoredInToken } from "../../models/tokens/authentication_token/auth
 import { UserModel } from "../../models/user/user";
 import { UserDataModel } from "../../models/user_data/user_data";
 import { catchError } from "../../utils/catch_error";
-import { ENV } from "../../utils/env_validation";
+import { ENV } from "../../utils/validate_env";
 import { MailBot } from "../../utils/mail.bot";
 import { Controller } from "../controller.interface";
 

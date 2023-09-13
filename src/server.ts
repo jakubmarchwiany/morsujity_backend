@@ -9,7 +9,7 @@ import { errorMiddleware } from "./middlewares/error.middleware";
 import { HttpException } from "./middlewares/exceptions/http.exception";
 import { fakeDelayMiddleware } from "./middlewares/fake_delay.middleware";
 import { rateLimitMiddleware } from "./middlewares/rate_limit.middleware";
-import { ENV } from "./utils/env_validation";
+import { ENV } from "./utils/validate_env";
 
 const { isDev, PORT, MONGO_URL, WHITELISTED_DOMAINS } = ENV;
 

@@ -1,5 +1,5 @@
 import { InferSchemaType, model, Schema } from "mongoose";
-import { ENV } from "../../../utils/env_validation";
+import { ENV } from "../../../utils/validate_env";
 
 const { RESET_PASSWORD_TOKEN_EXPIRE_AFTER } = ENV;
 

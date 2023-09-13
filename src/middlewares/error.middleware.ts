@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { ENV } from "../utils/env_validation";
+import { ENV } from "../utils/validate_env";
 import { HttpException } from "./exceptions/http.exception";
 
 const { isDev } = ENV;

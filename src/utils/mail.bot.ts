@@ -3,7 +3,7 @@ import handlebars from "handlebars";
 import nodemailer, { Transporter } from "nodemailer";
 import smtpTransport from "nodemailer-smtp-transport";
 import path from "path";
-import { ENV } from "./env_validation";
+import { ENV } from "./validate_env";
 
 const { FRONT_URL_ADDRESS, MAIL_HOST, MAIL_PORT, MAIL_PASS, MAIL_USER, MAIL_FROM } = ENV;
 
