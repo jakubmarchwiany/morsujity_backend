@@ -18,7 +18,7 @@ const groupSchema = new Schema({
     ],
 });
 
-export type Group = InferSchemaType<typeof groupSchema>;
-
+type Group = InferSchemaType<typeof groupSchema>;
 const GroupModel = model("Group", groupSchema);
-export default GroupModel;
+
+export { Group, GroupModel };

@@ -1,6 +1,7 @@
 import { InferSchemaType, model, Schema } from "mongoose";
+import { ENV } from "../../../utils/env_validation";
 
-const { AUTHENTICATION_TOKEN_EXPIRE_AFTER } = process.env;
+const { AUTHENTICATION_TOKEN_EXPIRE_AFTER } = ENV;
 
 const AuthenticationTokenSchema = new Schema({
     token: { type: String, required: true },
@@ -10,10 +11,11 @@ const AuthenticationTokenSchema = new Schema({
 
 AuthenticationTokenSchema.index(
     { expireIn: 1 },
-    { expireAfterSeconds: parseInt(AUTHENTICATION_TOKEN_EXPIRE_AFTER), name: "expireIn" }
+    { expireAfterSeconds: AUTHENTICATION_TOKEN_EXPIRE_AFTER, name: "expireIn" }
 );
 
-export type AuthenticationToken = InferSchemaType<typeof AuthenticationTokenSchema>;
-
+type AuthenticationToken = InferSchemaType<typeof AuthenticationTokenSchema>;
 const AuthenticationTokenModel = model("AuthenticationToken", AuthenticationTokenSchema);
-export default AuthenticationTokenModel;
+
+export { AuthenticationToken, AuthenticationTokenModel };
+

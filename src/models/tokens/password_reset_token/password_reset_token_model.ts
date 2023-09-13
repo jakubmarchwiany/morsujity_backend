@@ -1,6 +1,7 @@
 import { InferSchemaType, model, Schema } from "mongoose";
+import { ENV } from "../../../utils/env_validation";
 
-const { RESET_PASSWORD_TOKEN_EXPIRE_AFTER } = process.env;
+const { RESET_PASSWORD_TOKEN_EXPIRE_AFTER } = ENV;
 
 const passwordResetTokenSchema = new Schema({
     expireIn: {
@@ -18,12 +19,12 @@ const passwordResetTokenSchema = new Schema({
 passwordResetTokenSchema.index(
     { expireIn: 1 },
     {
-        expireAfterSeconds: parseInt(RESET_PASSWORD_TOKEN_EXPIRE_AFTER),
+        expireAfterSeconds: RESET_PASSWORD_TOKEN_EXPIRE_AFTER,
         name: "expireIn",
     }
 );
 
-export type PasswordResetToken = InferSchemaType<typeof passwordResetTokenSchema>;
-
+type PasswordResetToken = InferSchemaType<typeof passwordResetTokenSchema>;
 const PasswordResetTokenModel = model("PasswordResetToken", passwordResetTokenSchema);
-export default PasswordResetTokenModel;
+
+export { PasswordResetToken, PasswordResetTokenModel };

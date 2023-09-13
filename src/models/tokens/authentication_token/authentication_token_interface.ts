@@ -1,10 +1,11 @@
-
-export interface DataStoredInToken {
+interface DataStoredInToken {
     _id: string;
     data: string;
 }
-
-export interface TokenData {
+interface TokenData {
     token: string;
     expiresIn: number;
 }
+
+export { DataStoredInToken, TokenData };
+

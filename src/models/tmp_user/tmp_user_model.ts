@@ -1,6 +1,7 @@
 import { InferSchemaType, model, Schema } from "mongoose";
+import { ENV } from "../../utils/env_validation";
 
-const { USER_EXPIRE_AFTER } = process.env;
+const { USER_EXPIRE_AFTER } = ENV;
 
 const tmpUserSchema = new Schema({
     email: { type: String, required: true },
@@ -9,12 +10,9 @@ const tmpUserSchema = new Schema({
     expireIn: { type: Date, default: new Date(), required: true },
 });
 
-tmpUserSchema.index(
-    { expireIn: 1 },
-    { expireAfterSeconds: parseInt(USER_EXPIRE_AFTER), name: "expireIn" }
-);
+tmpUserSchema.index({ expireIn: 1 }, { expireAfterSeconds: USER_EXPIRE_AFTER, name: "expireIn" });
 
-export type AuthenticationToken = InferSchemaType<typeof tmpUserSchema>;
-
+type AuthenticationToken = InferSchemaType<typeof tmpUserSchema>;
 const TmpUserModel = model("TmpUser", tmpUserSchema);
-export default TmpUserModel;
+
+export { AuthenticationToken, TmpUserModel };

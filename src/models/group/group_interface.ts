@@ -1,17 +1,16 @@
-import { Model, ObjectId, Schema, Types } from "mongoose";
+import { Types } from "mongoose";
 
-export enum GroupStatus {
+enum GroupStatus {
     ACTIVE = "active",
     INACTIVE = "inactive",
 }
 
-export enum GroupPermission {
+enum GroupPermission {
     ADMIN = "Admin",
     PRO = "Pro",
     CASUAL = "Casual",
 }
-
-export type IGroupMember = {
+type IGroupMember = {
     _id: false;
     member: Types.ObjectId;
     permission: GroupPermission;
@@ -29,3 +28,6 @@ export type IGroupMember = {
     // minutesOfMors: { type: Number; default: 0 };
     // allMors: [Schema.Types.ObjectId];
 };
+
+export { GroupPermission, GroupStatus, IGroupMember };
+

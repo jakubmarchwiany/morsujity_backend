@@ -2,42 +2,24 @@ import bodyParser from "body-parser";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import cors, { CorsOptions } from "cors";
-import express, { NextFunction, Request, Response } from "express";
-import rateLimiter from "express-rate-limit";
+import express, { Request, Response } from "express";
 import mongoose from "mongoose";
-import Controller from "./interfaces/controller_interface";
-import errorMiddleware from "./middleware/error_middleware";
-import HttpException from "./middleware/exceptions/http_exception";
+import { Controller } from "./controllers/controller.interface";
+import { errorMiddleware } from "./middlewares/error.middleware";
+import { HttpException } from "./middlewares/exceptions/http_exception.exception";
+import { fakeDelayMiddleware } from "./middlewares/fake_delay.middleware";
+import { rateLimitMiddleware } from "./middlewares/rate_limit.middleware";
+import { ENV } from "./utils/env_validation";
 
-const { PORT, MONGO_URL, WHITELISTED_DOMAINS } = process.env;
+const { isDev, PORT, MONGO_URL, WHITELISTED_DOMAINS } = ENV;
 
-const rateLimit = rateLimiter({
-    max: 100, // the rate limit in reqs
-    windowMs: 1 * 60 * 1000, // time where limit applies
-    handler: (request, response, next, options) =>
-        response
-            .status(options.statusCode)
-            .send({ message: "Za dużo zapytań, spróbuj ponownie za chwilę" }),
-});
-
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-const fakeLoading = async function (req: Request, res: Response, next: NextFunction) {
-    await sleep(0);
-    next();
-};
-
-class Server {
-    public app: express.Application;
+export class Server {
+    private app = express();
 
     constructor(controllers: Controller[]) {
-        this.app = express();
-        this.app.use(fakeLoading);
-        this.connectToTheDatabase();
-        this.initializeCors();
-        this.initializeMiddlewares();
         this.initializeControllers(controllers);
-        this.initializeErrorHandling();
+        this.connectToTheDatabase();
+        this.initializeMiddlewares();
     }
 
     private connectToTheDatabase() {
@@ -46,21 +28,10 @@ class Server {
             .then(() => {
                 console.log("Connected to the database");
             })
-            .catch(() => {
+            .catch((error) => {
                 console.log("Error connecting to the database");
+                console.log(error);
             });
-    }
-
-    private initializeMiddlewares() {
-        this.app.use(bodyParser.json({ limit: "10mb" }));
-        this.app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
-        this.app.use(
-            compression({
-                threshold: 0,
-            })
-        );
-        this.app.use(cookieParser());
-        this.app.use(rateLimit);
     }
 
     private initializeCors() {
@@ -77,17 +48,28 @@ class Server {
         this.app.use(cors(corsOptions));
     }
 
+    private initializeMiddlewares() {
+        isDev && this.app.use(fakeDelayMiddleware);
+        this.app.use(rateLimitMiddleware);
+        this.initializeCors();
+        this.app.use(bodyParser.json({ limit: "10mb" }));
+        this.app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
+        this.app.use(
+            compression({
+                threshold: 0,
+            })
+        );
+        this.app.use(cookieParser());
+        this.app.use(errorMiddleware);
+    }
+
     private initializeControllers(controllers: Controller[]) {
         controllers.forEach((controller) => {
             this.app.use(controller.path, controller.router);
         });
-        this.app.use("*", (req: Request, res: Response, next: NextFunction) => {
-            next(new HttpException(404, "Not found"));
+        this.app.use("*", (req: Request, res: Response) => {
+            throw new HttpException(404, "Not found");
         });
-    }
-
-    private initializeErrorHandling() {
-        this.app.use(errorMiddleware);
     }
 
     public listen() {
@@ -96,4 +78,3 @@ class Server {
         });
     }
 }
-export default Server;

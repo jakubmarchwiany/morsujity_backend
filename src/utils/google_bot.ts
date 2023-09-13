@@ -3,7 +3,7 @@ import multer, { FileFilterCallback } from "multer";
 import path from "path";
 import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
-import HttpException from "../middleware/exceptions/http_exception";
+import { HttpException } from "../middlewares/exceptions/http_exception.exception";
 
 const { NODE_ENV, PROJECT_ID, KEY_FILE_NAME, GCLOUD_STORAGE_IMAGE_BUCKET } = process.env;
 
@@ -11,7 +11,7 @@ const ROUNDED_CORNERS = Buffer.from(
     '<svg><rect x="0" y="0" width="500" height="500" rx="50" ry="50"/></svg>'
 );
 
-class GoogleBot {
+export class GoogleBot {
     private readonly storage;
     private readonly imageBucket;
     public multer;
@@ -79,4 +79,3 @@ class GoogleBot {
         }
     };
 }
-export default GoogleBot;

@@ -1,13 +1,13 @@
 import fs from "fs";
 import handlebars from "handlebars";
-import { ObjectId, Schema } from "mongoose";
 import nodemailer, { Transporter } from "nodemailer";
 import smtpTransport from "nodemailer-smtp-transport";
 import path from "path";
+import { ENV } from "./env_validation";
 
-const { FRONT_URL_ADDRESS, MAIL_HOST, MAIL_PORT, MAIL_PASS, MAIL_USER, MAIL_FROM } = process.env;
+const { FRONT_URL_ADDRESS, MAIL_HOST, MAIL_PORT, MAIL_PASS, MAIL_USER, MAIL_FROM } = ENV;
 
-class MailBot {
+export class MailBot {
     private transporter!: Transporter;
 
     constructor() {
@@ -19,7 +19,7 @@ class MailBot {
             this.transporter = nodemailer.createTransport(
                 smtpTransport({
                     host: MAIL_HOST,
-                    port: parseInt(MAIL_PORT),
+                    port: MAIL_PORT,
                     auth: {
                         user: MAIL_USER,
                         pass: MAIL_PASS,
@@ -74,5 +74,3 @@ class MailBot {
         return this.transporter.sendMail(mailOptions);
     };
 }
-
-export default MailBot;

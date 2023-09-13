@@ -1,7 +1,7 @@
-import { Rank } from "../models/user_data/statistic/rank_interface";
+import { Rank } from "../models/user_data/statistic/rank";
 import { RANKS, SUBRANKS } from "../models/user_data/statistic/ranks_data";
 
-export function rankUp(currentRank: Rank, currentSubRank: Rank, totalTime: number) {
+function rankUp(currentRank: Rank, currentSubRank: Rank, totalTime: number) {
     let newRanks: [Rank, Rank] = [currentRank, currentSubRank];
     for (let i = currentRank.N; i < RANKS.length; i++) {
         if (totalTime < RANKS[i].maxValue) {
@@ -20,7 +20,7 @@ export function rankUp(currentRank: Rank, currentSubRank: Rank, totalTime: numbe
     return newRanks;
 }
 
-export function rankDown(currentRank: Rank, currentSubRank: Rank, totalTime: number) {
+function rankDown(currentRank: Rank, currentSubRank: Rank, totalTime: number) {
     let newRanks: [Rank, Rank] = [currentRank, currentSubRank];
 
     for (let i = currentRank.N; i >= 0; i--) {
@@ -38,3 +38,5 @@ export function rankDown(currentRank: Rank, currentSubRank: Rank, totalTime: num
 
     return newRanks;
 }
+
+export { rankDown, rankUp };
