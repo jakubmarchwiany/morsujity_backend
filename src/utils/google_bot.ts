@@ -3,7 +3,7 @@ import multer, { FileFilterCallback } from "multer";
 import path from "path";
 import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
-import { HttpException } from "../middlewares/exceptions/http_exception.exception";
+import { HttpException } from "../middlewares/exceptions/http.exception";
 
 const { NODE_ENV, PROJECT_ID, KEY_FILE_NAME, GCLOUD_STORAGE_IMAGE_BUCKET } = process.env;
 

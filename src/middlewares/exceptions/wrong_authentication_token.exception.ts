@@ -1,4 +1,4 @@
-import { HttpException } from "./http_exception.exception";
+import { HttpException } from "./http.exception";
 
 export class WrongAuthenticationTokenException extends HttpException {
     constructor() {

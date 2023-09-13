@@ -1,7 +1,7 @@
 import { Request, Response, Router } from "express";
 import { startSession } from "mongoose";
 import { ReqUser, authMiddleware } from "../middlewares/auth.middleware";
-import { HttpException } from "../middlewares/exceptions/http_exception.exception";
+import { HttpException } from "../middlewares/exceptions/http.exception";
 import {
     DeleteActivityData,
     deleteActivitySchema,

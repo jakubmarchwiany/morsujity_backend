@@ -6,7 +6,7 @@ import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import { Controller } from "./controllers/controller.interface";
 import { errorMiddleware } from "./middlewares/error.middleware";
-import { HttpException } from "./middlewares/exceptions/http_exception.exception";
+import { HttpException } from "./middlewares/exceptions/http.exception";
 import { fakeDelayMiddleware } from "./middlewares/fake_delay.middleware";
 import { rateLimitMiddleware } from "./middlewares/rate_limit.middleware";
 import { ENV } from "./utils/env_validation";
