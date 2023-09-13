@@ -17,9 +17,10 @@ export class Server {
     private app = express();
 
     constructor(controllers: Controller[]) {
-        this.initializeControllers(controllers);
+        this.initMiddlewares();
         this.connectToTheDatabase();
-        this.initializeMiddlewares();
+        this.initControllers(controllers);
+        this.initErrorMiddleware();
     }
 
     private connectToTheDatabase() {
@@ -48,10 +49,10 @@ export class Server {
         this.app.use(cors(corsOptions));
     }
 
-    private initializeMiddlewares() {
+    private initMiddlewares() {
+        this.initializeCors();
         isDev && this.app.use(fakeDelayMiddleware);
         this.app.use(rateLimitMiddleware);
-        this.initializeCors();
         this.app.use(bodyParser.json({ limit: "10mb" }));
         this.app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
         this.app.use(
@@ -60,10 +61,13 @@ export class Server {
             })
         );
         this.app.use(cookieParser());
+    }
+
+    private initErrorMiddleware() {
         this.app.use(errorMiddleware);
     }
 
-    private initializeControllers(controllers: Controller[]) {
+    private initControllers(controllers: Controller[]) {
         controllers.forEach((controller) => {
             this.app.use(controller.path, controller.router);
         });

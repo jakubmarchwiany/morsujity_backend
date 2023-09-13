@@ -1,4 +1,4 @@
-import bcrypt from "bcryptjs";
+import bcrypt, { hashSync } from "bcryptjs";
 import { Request, Response, Router } from "express";
 import { sign } from "jsonwebtoken";
 import { startSession } from "mongoose";
@@ -24,7 +24,7 @@ import { UserModel } from "../../models/user/user";
 import { UserDataModel } from "../../models/user_data/user_data";
 import { catchError } from "../../utils/catch_error";
 import { ENV } from "../../utils/env_validation";
-import { MailBot } from "../../utils/mail_bot";
+import { MailBot } from "../../utils/mail.bot";
 import { Controller } from "../controller.interface";
 
 const { JWT_SECRET, AUTHENTICATION_TOKEN_EXPIRE_AFTER, USER_APP_DOMAIN } = ENV;
@@ -36,7 +36,6 @@ export class AuthController implements Controller {
     private readonly userData = UserDataModel;
     private readonly tmpUser = TmpUserModel;
     private readonly authenticationToken = AuthenticationTokenModel;
-
     private readonly mailBot = new MailBot();
 
     constructor() {
@@ -70,21 +69,20 @@ export class AuthController implements Controller {
             try {
                 session.startTransaction();
 
-                const hashedPassword = await bcrypt.hash(password, 10);
+                const hashedPassword = hashSync(password, 10);
 
                 const tmpUser = new this.tmpUser({
                     pseudonym,
                     email,
                     password: hashedPassword,
                 });
-
-                await this.mailBot.sendMailEmailUserVerification(
+                await this.mailBot.sendMailVerificationEmail(
                     tmpUser.email,
                     tmpUser._id.toString()
                 );
                 await tmpUser.save({ session });
-
                 await session.commitTransaction();
+
                 res.status(201).send({
                     message: "Udało się utworzyć konto. Mail z potwierdzeniem wysłany na email",
                 });

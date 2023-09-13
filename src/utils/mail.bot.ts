@@ -32,9 +32,9 @@ export class MailBot {
             }, 10000);
         }
     }
-    public sendMailEmailUserVerification = async (targetMail: string, token: string) => {
+    public sendMailVerificationEmail = async (targetMail: string, token: string) => {
         const html = fs.readFileSync(
-            path.resolve(__dirname, "mail-messages/email-verification-message.html"),
+            path.resolve(__dirname, "email_messages/verification_email.html"),
             "utf8"
         );
         const template = handlebars.compile(html);
@@ -53,9 +53,9 @@ export class MailBot {
         return this.transporter.sendMail(mailOptions);
     };
 
-    public sendMailResetUserPassword = async (targetMail: string, token: string) => {
+    public sendMailResetPassword = async (targetMail: string, token: string) => {
         const html = fs.readFileSync(
-            path.resolve(__dirname, "mail-messages/password-reset-message.html"),
+            path.resolve(__dirname, "email_messages/reset_password.html"),
             "utf8"
         );
         const template = handlebars.compile(html);

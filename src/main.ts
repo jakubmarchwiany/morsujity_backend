@@ -1,6 +1,18 @@
 import { AuthController } from "./controllers/auth/auth.controller";
+import { PasswordController } from "./controllers/auth/password.controller";
 import { GroupController } from "./controllers/group.controller";
-import { UserController } from "./controllers/user.controller";
+import { ActivityController } from "./controllers/user/activity.controller";
+import { SettingsController } from "./controllers/user/settings.controller";
+import { UserController } from "./controllers/user/user.controller";
 import { Server } from "./server";
 
-new Server([new AuthController(), new UserController(), new GroupController()]).listen();
+const server = new Server([
+    new AuthController(),
+    new PasswordController(),
+    new UserController(),
+    new ActivityController(),
+    new SettingsController(),
+    new GroupController(),
+]);
+
+server.listen();

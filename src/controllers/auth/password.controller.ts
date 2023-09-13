@@ -24,7 +24,7 @@ import { AuthenticationTokenModel } from "../../models/tokens/authentication_tok
 import { PasswordResetTokenModel } from "../../models/tokens/password_reset_token/password_reset_token_model";
 import { UserModel } from "../../models/user/user";
 import { catchError } from "../../utils/catch_error";
-import { MailBot } from "../../utils/mail_bot";
+import { MailBot } from "../../utils/mail.bot";
 import { Controller } from "../controller.interface";
 
 export class PasswordController implements Controller {
@@ -72,7 +72,7 @@ export class PasswordController implements Controller {
 
                 const randomBytes = uuidv4();
                 const token = sha256(randomBytes);
-                await this.mailBot.sendMailResetUserPassword(email, randomBytes);
+                await this.mailBot.sendMailResetPassword(email, randomBytes);
                 await this.passwordResetToken.create({ token, userId: user }, { session });
 
                 await session.commitTransaction();
