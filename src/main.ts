@@ -1,4 +1,4 @@
-import { AuthController } from "./controllers/auth.controller";
+import { AuthController } from "./controllers/auth/auth.controller";
 import { GroupController } from "./controllers/group.controller";
 import { UserController } from "./controllers/user.controller";
 import { Server } from "./server";
