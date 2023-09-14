@@ -1,6 +1,6 @@
 import { InferType, object, string } from "yup";
 
-const newPasswordSchema = object({
+const updatePasswordWithTokenSchema = object({
     body: object({
         newPassword: string()
             .required("'newPassword' wymagane")
@@ -13,6 +13,6 @@ const newPasswordSchema = object({
         token: string().required("'token' wymagane").length(36, "Token niepoprawny"),
     }),
 });
-type NewPasswordData = InferType<typeof newPasswordSchema>;
+type UpdatePasswordWithTokenData = InferType<typeof updatePasswordWithTokenSchema>;
 
-export { NewPasswordData, newPasswordSchema };
+export { UpdatePasswordWithTokenData, updatePasswordWithTokenSchema };

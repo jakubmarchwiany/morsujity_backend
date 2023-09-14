@@ -24,21 +24,21 @@ export class SettingsController implements Controller {
 
     private initializeRoutes() {
         this.router.post(
-            `/change-pseudonym`,
+            `/update-pseudonym`,
             validateMiddleware(changePseudonymSchema),
             authMiddleware,
-            catchError(this.changeUserPseudonym)
+            catchError(this.updateUserPseudonym)
         );
         this.router.post(
-            `/change-image`,
+            `/update-image`,
             authMiddleware,
             this.imageBot.multer.single("userImage"),
-            catchError(this.changeUserImage)
+            catchError(this.updateUserImage)
         );
-        this.router.get(`/set-image-to-def`, authMiddleware, catchError(this.setImageToDef));
+        this.router.get(`/set-image-to-def`, authMiddleware, catchError(this.setUserImageToDef));
     }
 
-    private readonly changeUserPseudonym = async (
+    private readonly updateUserPseudonym = async (
         req: Request<never, never, ChangePseudonymData["body"]> & ReqUser,
         res: Response
     ) => {
@@ -54,7 +54,7 @@ export class SettingsController implements Controller {
         res.send({ message: "Udało się zaktualizować ksywkę" });
     };
 
-    private readonly changeUserImage = async (
+    private readonly updateUserImage = async (
         req: Request & ReqUser & { file: Express.Multer.File },
         res: Response
     ) => {
@@ -85,7 +85,7 @@ export class SettingsController implements Controller {
         }
     };
 
-    private readonly setImageToDef = async (req: Request & ReqUser, res: Response) => {
+    private readonly setUserImageToDef = async (req: Request & ReqUser, res: Response) => {
         const session = await startSession();
         try {
             session.startTransaction();

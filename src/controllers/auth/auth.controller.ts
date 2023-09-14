@@ -23,8 +23,8 @@ import { DataStoredInToken } from "../../models/tokens/authentication_token/auth
 import { UserModel } from "../../models/user/user";
 import { UserDataModel } from "../../models/user_data/user_data";
 import { catchError } from "../../utils/catch_error";
-import { ENV } from "../../utils/validate_env";
 import { MailBot } from "../../utils/mail.bot";
+import { ENV } from "../../utils/validate_env";
 import { Controller } from "../controller.interface";
 
 const { JWT_SECRET, AUTHENTICATION_TOKEN_EXPIRE_AFTER, USER_APP_DOMAIN } = ENV;
@@ -43,21 +43,81 @@ export class AuthController implements Controller {
     }
 
     private initializeRoutes() {
-        this.router.post(`/login`, validateMiddleware(loginUserSchema), catchError(this.loggingIn));
-        this.router.get(`/logout`, authMiddleware, catchError(this.logOut));
+        this.router.post(
+            `/login`,
+            validateMiddleware(loginUserSchema),
+            catchError(this.createAuthToken)
+        );
+        this.router.get(`/logout`, authMiddleware, catchError(this.deleteAuthToken));
         this.router.post(
             `/register`,
             validateMiddleware(registerUserSchema),
-            catchError(this.registerUser)
+            catchError(this.createTmpUserAndSendEmail)
         );
         this.router.post(
             `/verify-user-email`,
             validateMiddleware(verifyUserEmailSchema),
-            catchError(this.verifyUserEmail)
+            catchError(this.verifyEmailAndCreateUser)
         );
     }
 
-    private readonly registerUser = async (
+    private readonly createAuthToken = async (
+        req: Request<never, never, LoginUserData["body"]>,
+        res: Response
+    ) => {
+        const { email, password } = req.body;
+        const user = await this.user.findOne({ email }).lean();
+        if (user !== null) {
+            const isPasswordMatching = await bcrypt.compare(password, user.password);
+
+            if (isPasswordMatching) {
+                const tokenString = this.createAuthJwtToken(
+                    user._id.toString(),
+                    user.data.toString()
+                );
+                await this.authenticationToken.create({ token: tokenString, owner: user._id });
+
+                res.send({
+                    data: {
+                        expires: AUTHENTICATION_TOKEN_EXPIRE_AFTER,
+                        domain: USER_APP_DOMAIN,
+                        token: tokenString,
+                    },
+                    message: "Udało się zalogować",
+                });
+            } else {
+                throw new WrongCredentialsException();
+            }
+        } else {
+            throw new HttpException(
+                400,
+                `Konto nie istnieje lub jest nieaktywne. Sprawdź mail: ${email}`
+            );
+        }
+    };
+
+    private createAuthJwtToken(userID: string, dataID: string): string {
+        const dataStoredInToken: DataStoredInToken = {
+            _id: userID,
+            data: dataID,
+        };
+
+        return sign(dataStoredInToken, JWT_SECRET, {
+            expiresIn: AUTHENTICATION_TOKEN_EXPIRE_AFTER,
+        });
+    }
+
+    private readonly deleteAuthToken = async (req: Request, res: Response) => {
+        const bearerHeader = req.headers["authorization"]!.substring(7);
+        const response = await this.authenticationToken.deleteOne({ token: bearerHeader });
+
+        if (response.deletedCount == 0)
+            throw new HttpException(400, `Token autoryzacyjny nie istnieje`);
+
+        res.send({ message: "Udało się wylogować" });
+    };
+
+    private readonly createTmpUserAndSendEmail = async (
         req: Request<never, never, RegisterUserData["body"]>,
         res: Response
     ) => {
@@ -76,10 +136,7 @@ export class AuthController implements Controller {
                     email,
                     password: hashedPassword,
                 });
-                await this.mailBot.sendMailVerificationEmail(
-                    tmpUser.email,
-                    tmpUser._id.toString()
-                );
+                await this.mailBot.sendMailVerificationEmail(tmpUser.email, tmpUser._id.toString());
                 await tmpUser.save({ session });
                 await session.commitTransaction();
 
@@ -95,7 +152,7 @@ export class AuthController implements Controller {
         }
     };
 
-    private readonly verifyUserEmail = async (
+    private readonly verifyEmailAndCreateUser = async (
         req: Request<never, never, EmailTokenData["body"]>,
         res: Response
     ) => {
@@ -130,61 +187,5 @@ export class AuthController implements Controller {
         } else {
             throw new EmailVerificationNotFoundOrExpired();
         }
-    };
-
-    private readonly loggingIn = async (
-        req: Request<never, never, LoginUserData["body"]>,
-        res: Response
-    ) => {
-        const { email, password } = req.body;
-        const user = await this.user.findOne({ email }).lean();
-        if (user !== null) {
-            const isPasswordMatching = await bcrypt.compare(password, user.password);
-
-            if (isPasswordMatching) {
-                const tokenString = this.createAuthenticationToken(
-                    user._id.toString(),
-                    user.data.toString()
-                );
-                await this.authenticationToken.create({ token: tokenString, owner: user._id });
-
-                res.send({
-                    data: {
-                        expires: AUTHENTICATION_TOKEN_EXPIRE_AFTER,
-                        domain: USER_APP_DOMAIN,
-                        token: tokenString,
-                    },
-                    message: "Udało się zalogować",
-                });
-            } else {
-                throw new WrongCredentialsException();
-            }
-        } else {
-            throw new HttpException(
-                400,
-                `Konto nie istnieje lub jest nieaktywne. Sprawdź mail: ${email}`
-            );
-        }
-    };
-
-    private createAuthenticationToken(userID: string, dataID: string): string {
-        const dataStoredInToken: DataStoredInToken = {
-            _id: userID,
-            data: dataID,
-        };
-
-        return sign(dataStoredInToken, JWT_SECRET, {
-            expiresIn: AUTHENTICATION_TOKEN_EXPIRE_AFTER,
-        });
-    }
-
-    private readonly logOut = async (req: Request, res: Response) => {
-        const bearerHeader = req.headers["authorization"]!.substring(7);
-        const response = await this.authenticationToken.deleteOne({ token: bearerHeader });
-
-        if (response.deletedCount == 0)
-            throw new HttpException(400, `Token autoryzacyjny nie istnieje`);
-
-        res.send({ message: "Udało się wylogować" });
     };
 }

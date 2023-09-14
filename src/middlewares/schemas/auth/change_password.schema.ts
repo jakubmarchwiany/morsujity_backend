@@ -1,6 +1,6 @@
 import { InferType, object, string } from "yup";
 
-const changePasswordSchema = object({
+const updatePasswordSchema = object({
     body: object({
         oldPassword: string()
             .required("'oldPassword' wymagane")
@@ -20,6 +20,6 @@ const changePasswordSchema = object({
             .matches(/(?=.*[!@#$%^&*])/, "Musi zawierać znak specjalny (! @ # $ % ^ & *)"),
     }),
 });
-type ChangePasswordData = InferType<typeof changePasswordSchema>;
+type UpdatePasswordData = InferType<typeof updatePasswordSchema>;
 
-export { ChangePasswordData, changePasswordSchema };
+export { UpdatePasswordData, updatePasswordSchema };

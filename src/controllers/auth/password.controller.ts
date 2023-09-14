@@ -8,17 +8,17 @@ import { HttpException } from "../../middlewares/exceptions/http.exception";
 import { WrongAuthenticationTokenException } from "../../middlewares/exceptions/wrong_authentication_token.exception";
 import { WrongCredentialsException } from "../../middlewares/exceptions/wrong_credentials.exception";
 import {
-    ChangePasswordData,
-    changePasswordSchema,
+    UpdatePasswordData,
+    updatePasswordSchema,
 } from "../../middlewares/schemas/auth/change_password.schema";
 import {
-    NewPasswordData,
-    newPasswordSchema,
+    UpdatePasswordWithTokenData,
+    updatePasswordWithTokenSchema,
 } from "../../middlewares/schemas/auth/new_password.schema";
 import {
-    ResetPasswordData,
-    resetPasswordSchema,
-} from "../../middlewares/schemas/auth/reset_password.schema";
+    ResetPasswordEmailData,
+    resetPasswordEmailSchema,
+} from "../../middlewares/schemas/auth/reset_password_Email.schema";
 import { validateMiddleware } from "../../middlewares/validate.middleware";
 import { AuthenticationTokenModel } from "../../models/tokens/authentication_token/authentication_token";
 import { PasswordResetTokenModel } from "../../models/tokens/password_reset_token/password_reset_token_model";
@@ -41,25 +41,25 @@ export class PasswordController implements Controller {
 
     private initializeRoutes() {
         this.router.post(
-            `/reset`,
-            validateMiddleware(resetPasswordSchema),
-            catchError(this.resetPassword)
+            `/reset-email`,
+            validateMiddleware(resetPasswordEmailSchema),
+            catchError(this.createPasswordResetTokenAndSendEmail)
         );
         this.router.post(
-            `/new`,
-            validateMiddleware(newPasswordSchema),
-            catchError(this.newPassword)
+            `/update-with-token`,
+            validateMiddleware(updatePasswordWithTokenSchema),
+            catchError(this.updatePasswordWithToken)
         );
         this.router.post(
-            `/change`,
+            `/update`,
             authMiddleware,
-            validateMiddleware(changePasswordSchema),
-            catchError(this.changePassword)
+            validateMiddleware(updatePasswordSchema),
+            catchError(this.updatePassword)
         );
     }
 
-    private readonly resetPassword = async (
-        req: Request<never, never, ResetPasswordData["body"]>,
+    private readonly createPasswordResetTokenAndSendEmail = async (
+        req: Request<never, never, ResetPasswordEmailData["body"]>,
         res: Response
     ) => {
         const { email } = req.body;
@@ -85,8 +85,8 @@ export class PasswordController implements Controller {
         }
     };
 
-    private readonly newPassword = async (
-        req: Request<never, never, NewPasswordData["body"]>,
+    private readonly updatePasswordWithToken = async (
+        req: Request<never, never, UpdatePasswordWithTokenData["body"]>,
         res: Response,
         next: NextFunction
     ) => {
@@ -133,8 +133,8 @@ export class PasswordController implements Controller {
         }
     };
 
-    private readonly changePassword = async (
-        req: Request<never, never, ChangePasswordData["body"]> & ReqUser,
+    private readonly updatePassword = async (
+        req: Request<never, never, UpdatePasswordData["body"]> & ReqUser,
         res: Response
     ) => {
         const { newPassword, oldPassword } = req.body;

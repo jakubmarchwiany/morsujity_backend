@@ -15,7 +15,6 @@ export class UserController implements Controller {
 
     private initializeRoutes() {
         this.router.get(`/data`, authMiddleware, catchError(this.getUserData));
-        this.router.get(`/allActivity`, authMiddleware, catchError(this.getAllActivity));
     }
 
     private readonly getUserData = async (req: Request & ReqUser, res: Response) => {
@@ -25,18 +24,6 @@ export class UserController implements Controller {
             })
             .lean();
 
-        res.send({ user: userData, message: "Udało się autoryzować użytkownika" });
-    };
-    private readonly getAllActivity = async (req: Request & ReqUser, res: Response) => {
-        const userData = await this.userData
-            .findById(req.user.data, {
-                "statistics.activity": 1,
-            })
-            .lean();
-
-        res.send({
-            activity: userData!.statistics.activity,
-            message: "Udało się pobrać wszystkie aktywności",
-        });
+        res.send({ data: userData, message: "Udało się autoryzować użytkownika" });
     };
 }

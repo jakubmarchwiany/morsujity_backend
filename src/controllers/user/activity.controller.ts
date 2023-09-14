@@ -28,10 +28,10 @@ export class ActivityController implements Controller {
 
     private initializeRoutes() {
         this.router.post(
-            `/new`,
+            `/create`,
             validateMiddleware(newActivitySchema),
             authMiddleware,
-            catchError(this.newActivity)
+            catchError(this.createActivity)
         );
         this.router.post(
             `/delete`,
@@ -39,9 +39,10 @@ export class ActivityController implements Controller {
             authMiddleware,
             catchError(this.deleteActivity)
         );
+        this.router.get(`/allActivity`, authMiddleware, catchError(this.getAllActivity));
     }
 
-    private readonly newActivity = async (
+    private readonly createActivity = async (
         req: Request<never, never, NewActivityData["body"]> & ReqUser,
         res: Response
     ) => {
@@ -159,5 +160,18 @@ export class ActivityController implements Controller {
         // };
 
         // res.send({ message: "Udało się usunąć aktywność", data });
+    };
+
+    private readonly getAllActivity = async (req: Request & ReqUser, res: Response) => {
+        const userData = await this.userData
+            .findById(req.user.data, {
+                "statistics.activity": 1,
+            })
+            .lean();
+
+        res.send({
+            data: userData!.statistics.activity,
+            message: "Udało się pobrać wszystkie aktywności",
+        });
     };
 }
