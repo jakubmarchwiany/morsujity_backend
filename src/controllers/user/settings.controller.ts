@@ -10,7 +10,10 @@ import { validateMiddleware } from "../../middlewares/validate.middleware";
 import { UserDataModel } from "../../models/user_data/user_data";
 import { catchError } from "../../utils/catch_error";
 import { GoogleBot } from "../../utils/google.bot";
+import { ENV } from "../../utils/validate_env";
 import { Controller } from "../controller.interface";
+
+const { USER_IMAGE_URL, DEF_USER_IMAGE } = ENV;
 
 export class SettingsController implements Controller {
     public router = Router();
@@ -63,19 +66,21 @@ export class SettingsController implements Controller {
             session.startTransaction();
 
             const fileName = await this.imageBot.saveNewUserImage(req.file);
-            const user = await this.userData.findById(req.user.data, { image: 1 });
+            const userData = await this.userData.findById(req.user.data, { image: 1 });
 
-            if (user!.image !== "def") {
-                await this.imageBot.deleteUserImage(user!.image);
+            if (userData!.image !== DEF_USER_IMAGE) {
+                await this.imageBot.deleteUserImage(userData!.image);
             }
 
-            user!.image = fileName;
-            await user!.save({ session });
+            userData!.image = fileName;
+            await userData!.save({ session });
+
+            const imageUrl = USER_IMAGE_URL + userData?.image + ".webp";
 
             await session.commitTransaction();
             res.send({
                 message: "Udało się zaktualizować zdjęcie",
-                image: user!.image,
+                image: imageUrl,
             });
         } catch (error) {
             await session.abortTransaction();
@@ -90,19 +95,21 @@ export class SettingsController implements Controller {
         try {
             session.startTransaction();
 
-            const user = await this.userData.findById(req.user.data, { image: 1 });
-            if (user!.image === "def")
+            const userData = await this.userData.findById(req.user.data, { image: 1 });
+            if (userData!.image === DEF_USER_IMAGE)
                 return res.send({ message: "Użytkownik ma już domyślne zdjęcie" });
 
-            await this.imageBot.deleteUserImage(user!.image);
+            await this.imageBot.deleteUserImage(userData!.image);
 
-            user!.image = "def";
-            await user!.save({ session });
+            userData!.image = DEF_USER_IMAGE;
+            await userData!.save({ session });
+
+            const imageUrl = USER_IMAGE_URL + userData?.image + ".webp";
 
             await session.commitTransaction();
             res.send({
                 message: "Udało ustawić domyślne zdjęcie",
-                image: user!.image,
+                image: imageUrl,
             });
         } catch (error) {
             await session.abortTransaction();

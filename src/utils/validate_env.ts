@@ -36,4 +36,5 @@ export const ENV = cleanEnv(process.env, {
     KEY_FILE_NAME: str(),
     GCLOUD_STORAGE_IMAGE_BUCKET: str(),
     DEF_USER_IMAGE: str(),
+    USER_IMAGE_URL: str(),
 });
