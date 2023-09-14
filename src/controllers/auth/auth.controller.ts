@@ -98,8 +98,8 @@ export class AuthController implements Controller {
 
     private createAuthJwtToken(userID: string, dataID: string): string {
         const dataStoredInToken: DataStoredInToken = {
-            _id: userID,
-            data: dataID,
+            userId: userID,
+            dataId: dataID,
         };
 
         return sign(dataStoredInToken, JWT_SECRET, {

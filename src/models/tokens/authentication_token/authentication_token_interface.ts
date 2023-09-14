@@ -1,6 +1,6 @@
 interface DataStoredInToken {
-    _id: string;
-    data: string;
+    userId: string;
+    dataId: string;
 }
 interface TokenData {
     token: string;
@@ -8,4 +8,3 @@ interface TokenData {
 }
 
 export { DataStoredInToken, TokenData };
-

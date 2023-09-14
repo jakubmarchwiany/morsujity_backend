@@ -22,7 +22,7 @@ export class UserController implements Controller {
 
     private readonly getUserData = async (req: Request & ReqUser, res: Response) => {
         let userData = await this.userData
-            .findById(req.user.data, {
+            .findById(req.user.dataId, {
                 "statistics.activity": { $slice: -5 },
             })
             .lean();

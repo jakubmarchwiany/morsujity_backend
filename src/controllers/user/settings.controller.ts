@@ -48,7 +48,7 @@ export class SettingsController implements Controller {
         const { pseudonym } = req.body;
 
         const result = await this.userData.updateOne(
-            { _id: req.user.data },
+            { _id: req.user.dataId },
             { $set: { pseudonym: pseudonym } }
         );
 
@@ -66,7 +66,7 @@ export class SettingsController implements Controller {
             session.startTransaction();
 
             const fileName = await this.imageBot.saveNewUserImage(req.file);
-            const userData = await this.userData.findById(req.user.data, { image: 1 });
+            const userData = await this.userData.findById(req.user.dataId, { image: 1 });
 
             if (userData!.image !== DEF_USER_IMAGE) {
                 await this.imageBot.deleteUserImage(userData!.image);
@@ -95,7 +95,7 @@ export class SettingsController implements Controller {
         try {
             session.startTransaction();
 
-            const userData = await this.userData.findById(req.user.data, { image: 1 });
+            const userData = await this.userData.findById(req.user.dataId, { image: 1 });
             if (userData!.image === DEF_USER_IMAGE)
                 return res.send({ message: "Użytkownik ma już domyślne zdjęcie" });
 

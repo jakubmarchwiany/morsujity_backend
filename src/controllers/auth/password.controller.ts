@@ -139,7 +139,7 @@ export class PasswordController implements Controller {
     ) => {
         const { newPassword, oldPassword } = req.body;
 
-        const user = await this.userModel.findById(req.user._id, { password: 1 });
+        const user = await this.userModel.findById(req.user.userId, { password: 1 });
         if (user) {
             const isPasswordMatching = compareSync(oldPassword, user.password);
             if (isPasswordMatching) {
@@ -151,7 +151,7 @@ export class PasswordController implements Controller {
                     session.startTransaction();
 
                     await user.save({ session });
-                    await this.authenticationToken.deleteMany({ owner: req.user._id }, { session });
+                    await this.authenticationToken.deleteMany({ owner: req.user.userId }, { session });
 
                     res.send({ message: "Hasło zostało zmienione" });
                     await session.commitTransaction();
