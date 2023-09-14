@@ -1,4 +1,4 @@
-import { Rank } from "./rank";
+import { Rank } from "../../../models/user_data/statistic/rank";
 
 const RANKS: Rank[] = [
     {
@@ -43,7 +43,7 @@ const RANKS: Rank[] = [
     },
 ];
 
-const SUBRANKS: Rank[] = [
+const SUB_RANKS: Rank[] = [
     {
         N: 0,
         name: "rybka",
@@ -183,9 +183,9 @@ const firstRank: Rank = {
 };
 
 const firstSubRank: Rank = {
-    N: SUBRANKS[0].N,
-    name: SUBRANKS[0].name,
-    maxValue: SUBRANKS[0].maxValue,
+    N: SUB_RANKS[0].N,
+    name: SUB_RANKS[0].name,
+    maxValue: SUB_RANKS[0].maxValue,
 };
 
-export { RANKS, SUBRANKS, firstRank, firstSubRank };
+export { RANKS, SUB_RANKS, firstRank, firstSubRank };

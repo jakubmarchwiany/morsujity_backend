@@ -1,15 +1,15 @@
 import { boolean, date, InferType, number, object } from "yup";
 
-const newActivitySchema = object({
+const createActivitySchema = object({
     body: object({
-        activityType: boolean().required("'activityType' wymagane"),
+        activityType: number().min(0).required("'activityType' wymagane"),
         date: date().required("'data' wymagane"),
         duration: number()
             .required("'duration' wymagane")
             .min(1, "Minimalna długość aktywności to 1 s")
-            .max(3660, "Maksymalna długość aktywności to 1h"),
+            .max(3659, "Maksymalna długość aktywności to 1h"),
     }),
 });
-type NewActivityData = InferType<typeof newActivitySchema>;
+type CreateActivityData = InferType<typeof createActivitySchema>;
 
-export { NewActivityData, newActivitySchema };
+export { CreateActivityData, createActivitySchema };
