@@ -2,9 +2,7 @@ import { InferType, object, string } from "yup";
 
 const deleteActivitySchema = object({
     body: object({
-        activityID: string()
-            .required("'activityID' wymagane")
-            .length(24, "'activityID' niepoprawny"),
+        _id: string().required("'activityID' wymagane").length(24, "'activityID' niepoprawny"),
     }),
 });
 type DeleteActivityData = InferType<typeof deleteActivitySchema>;
