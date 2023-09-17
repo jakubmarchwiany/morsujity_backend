@@ -6,7 +6,7 @@ const statisticsSchema = new Schema(
     {
         rank: { type: rankSchema, default: firstRank, require: true },
         subRank: { type: rankSchema, default: firstSubRank, require: true },
-        totalActivityTime: { type: [Number], default: [0, 0], require: true },
+        totalActivitiesTime: { type: [Number], default: [0, 0], require: true },
     },
     {
         _id: false,

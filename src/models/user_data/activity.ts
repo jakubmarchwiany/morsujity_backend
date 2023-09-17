@@ -7,7 +7,7 @@ enum ActivityTypes {
 
 const activitySchema = new Schema({
     owner: { type: Schema.Types.ObjectId, ref: "user", required: true, index: true },
-    activityType: { type: Number, required: true },
+    type: { type: Number, required: true },
     date: { type: Date, required: true, index: true },
     duration: { type: Number, required: true },
 });

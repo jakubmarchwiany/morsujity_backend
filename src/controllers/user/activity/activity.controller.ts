@@ -42,33 +42,33 @@ export class ActivityController implements Controller {
             authMiddleware,
             catchError(this.deleteActivity)
         );
-        this.router.get(`/allActivity`, authMiddleware, catchError(this.getAllActivity));
+        this.router.get(`/all`, authMiddleware, catchError(this.getAllActivitities));
     }
 
     private readonly createActivityAndUpdateRank = async (
         req: Request<never, never, CreateActivityData["body"]> & ReqUser,
         res: Response
     ) => {
-        const { activityType, duration, date } = req.body;
-
+        const { type, duration, date } = req.body;
+        console.log(type);
         const resData = await this.userData.findById(req.user.dataId, {
-            "statistics.totalActivityTime": 1,
+            "statistics.totalActivitiesTime": 1,
         });
 
         const statistics = resData!.statistics;
 
-        const { totalActivityTime } = statistics;
+        const { totalActivitiesTime } = statistics;
 
-        totalActivityTime[activityType] += duration;
+        totalActivitiesTime[type] += duration;
 
-        const { rank, subRank } = this.calculateRankandSubRank(totalActivityTime);
+        const { rank, subRank } = this.calculateRankandSubRank(totalActivitiesTime);
 
         const session = await startSession();
         try {
             session.startTransaction();
             const activity = new this.activity({
                 owner: req.user.userId,
-                activityType,
+                type,
                 date,
                 duration,
             });
@@ -80,7 +80,7 @@ export class ActivityController implements Controller {
                     $set: {
                         "statistics.rank": rank,
                         "statistics.subRank": subRank,
-                        "statistics.totalActivityTime": totalActivityTime,
+                        "statistics.totalActivitiesTime": totalActivitiesTime,
                     },
                 },
                 { session }
@@ -104,27 +104,27 @@ export class ActivityController implements Controller {
         req: Request<never, never, DeleteActivityData["body"]> & ReqUser,
         res: Response
     ) => {
-        const { activityID } = req.body;
+        const { _id } = req.body;
 
-        const activity = await this.activity.findById(activityID);
+        const activity = await this.activity.findById(_id);
 
         if (activity) {
             const resData = await this.userData.findById(req.user.dataId, {
-                "statistics.totalActivityTime": 1,
+                "statistics.totalActivitiesTime": 1,
             });
 
             const statistics = resData!.statistics;
 
-            const { totalActivityTime } = statistics;
+            const { totalActivitiesTime } = statistics;
 
-            totalActivityTime[activity.activityType] -= activity.duration;
+            totalActivitiesTime[activity.type] -= activity.duration;
 
-            const { rank, subRank } = this.calculateRankandSubRank(totalActivityTime);
+            const { rank, subRank } = this.calculateRankandSubRank(totalActivitiesTime);
 
             const session = await startSession();
             try {
                 session.startTransaction();
-                await this.activity.deleteOne({ _id: activityID }, { session });
+                await this.activity.deleteOne({ _id: _id }, { session });
 
                 await this.userData.updateOne(
                     { _id: req.user.dataId },
@@ -132,7 +132,7 @@ export class ActivityController implements Controller {
                         $set: {
                             "statistics.rank": rank,
                             "statistics.subRank": subRank,
-                            "statistics.totalActivityTime": totalActivityTime,
+                            "statistics.totalActivitiesTime": totalActivitiesTime,
                         },
                     },
                     { session }
@@ -180,15 +180,13 @@ export class ActivityController implements Controller {
         return { rank, subRank };
     };
 
-    private readonly getAllActivity = async (req: Request & ReqUser, res: Response) => {
-        const userData = await this.userData
-            .findById(req.user.dataId, {
-                "statistics.activity": 1,
-            })
-            .lean();
-
+    private readonly getAllActivitities = async (req: Request & ReqUser, res: Response) => {
+        const allActivities = await this.activity.find({ owner: req.user.userId }, null, {
+            order: { date: -1 },
+        });
+        console.log(allActivities);
         res.send({
-            // data: userData!.statistics.activity,
+            data: allActivities,
             message: "Udało się pobrać wszystkie aktywności",
         });
     };
