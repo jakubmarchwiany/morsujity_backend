@@ -24,7 +24,11 @@ export class UserController implements Controller {
 
     private readonly getUserData = async (req: Request & ReqUser, res: Response) => {
         let userData = await this.userData.findById(req.user.dataId).lean();
-        const activities = await this.activity.find({ owner: req.user.userId }).lean();
+
+        const activities = await this.activity
+            .find({ owner: req.user.userId }, null, { sort: { date: -1 } })
+            .limit(10)
+            .lean();
 
         userData!.image = USER_IMAGE_URL + userData?.image + ".webp";
 
