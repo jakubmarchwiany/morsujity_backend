@@ -15,7 +15,7 @@ import { ActivityModel } from "../../../models/user_data/activity";
 import { Rank } from "../../../models/user_data/statistic/rank";
 import { UserDataModel } from "../../../models/user_data/user_data";
 import { catchError } from "../../../utils/catch_error";
-import { Controller } from "../../controller.interface";
+import { Controller } from "../../controller.type";
 import { RANKS, SUB_RANKS } from "./ranks.data";
 
 export class ActivityController implements Controller {

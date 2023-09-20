@@ -1,6 +1,6 @@
 import { AuthController } from "./controllers/auth/auth.controller";
 import { PasswordController } from "./controllers/auth/password.controller";
-import { GroupController } from "./controllers/group.controller";
+import { GroupsController } from "./controllers/groups/groups.controller";
 import { ActivityController } from "./controllers/user/activity/activity.controller";
 import { SettingsController } from "./controllers/user/settings.controller";
 import { UserController } from "./controllers/user/user.controller";
@@ -12,7 +12,7 @@ const server = new Server([
     new UserController(),
     new ActivityController(),
     new SettingsController(),
-    new GroupController(),
+    new GroupsController(),
 ]);
 
 server.listen();

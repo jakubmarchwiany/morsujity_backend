@@ -11,7 +11,7 @@ import { UserDataModel } from "../../models/user_data/user_data";
 import { catchError } from "../../utils/catch_error";
 import { GoogleBot } from "../../utils/google.bot";
 import { ENV } from "../../utils/validate_env";
-import { Controller } from "../controller.interface";
+import { Controller } from "../controller.type";
 
 const { USER_IMAGE_URL, DEF_USER_IMAGE } = ENV;
 

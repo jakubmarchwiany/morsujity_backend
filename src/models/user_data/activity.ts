@@ -1,9 +1,5 @@
 import { InferSchemaType, Schema, model } from "mongoose";
-
-enum ActivityTypes {
-    ColdShower,
-    WinterSwiming,
-}
+import { ActivityType } from "./activity_type.enum";
 
 const activitySchema = new Schema({
     owner: { type: Schema.Types.ObjectId, ref: "user", required: true, index: true },
@@ -15,4 +11,4 @@ const activitySchema = new Schema({
 type Activity = InferSchemaType<typeof activitySchema>;
 const ActivityModel = model("Activity", activitySchema);
 
-export { Activity, ActivityModel, ActivityTypes, activitySchema };
+export { Activity, ActivityModel, ActivityType, activitySchema };

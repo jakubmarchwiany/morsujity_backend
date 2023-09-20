@@ -1,7 +1,7 @@
 import { InferSchemaType, model, Schema } from "mongoose";
 import { ENV } from "../../../utils/validate_env";
 
-const { RESET_PASSWORD_TOKEN_EXPIRE_AFTER } = ENV;
+const { TOKEN_RESET_PASSWORD_EXPIRE_AFTER: RESET_PASSWORD_TOKEN_EXPIRE_AFTER } = ENV;
 
 const passwordResetTokenSchema = new Schema({
     expireIn: {

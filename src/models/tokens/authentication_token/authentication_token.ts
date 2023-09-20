@@ -1,7 +1,7 @@
 import { InferSchemaType, model, Schema } from "mongoose";
 import { ENV } from "../../../utils/validate_env";
 
-const { AUTHENTICATION_TOKEN_EXPIRE_AFTER } = ENV;
+const { TOKEN_AUTHENTICATION_EXPIRE_AFTER: AUTHENTICATION_TOKEN_EXPIRE_AFTER } = ENV;
 
 const AuthenticationTokenSchema = new Schema({
     token: { type: String, required: true },
@@ -18,4 +18,3 @@ type AuthenticationToken = InferSchemaType<typeof AuthenticationTokenSchema>;
 const AuthenticationTokenModel = model("AuthenticationToken", AuthenticationTokenSchema);
 
 export { AuthenticationToken, AuthenticationTokenModel };
-

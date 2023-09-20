@@ -4,7 +4,7 @@ import { ActivityModel } from "../../models/user_data/activity";
 import { UserDataModel } from "../../models/user_data/user_data";
 import { catchError } from "../../utils/catch_error";
 import { ENV } from "../../utils/validate_env";
-import { Controller } from "../controller.interface";
+import { Controller } from "../controller.type";
 
 const { USER_IMAGE_URL } = ENV;
 

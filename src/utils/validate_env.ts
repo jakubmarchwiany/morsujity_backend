@@ -26,10 +26,10 @@ export const ENV = cleanEnv(process.env, {
 
     // Variables USER
     USER_EXPIRE_AFTER: num(),
-    AUTHENTICATION_TOKEN_EXPIRE_AFTER: num(),
+    TOKEN_AUTHENTICATION_EXPIRE_AFTER: num(),
 
     // ResetPasswordToken
-    RESET_PASSWORD_TOKEN_EXPIRE_AFTER: num(),
+    TOKEN_RESET_PASSWORD_EXPIRE_AFTER: num(),
 
     // Google console configuration
     PROJECT_ID: str(),

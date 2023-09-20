@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 import cors, { CorsOptions } from "cors";
 import express, { Request, Response } from "express";
 import mongoose from "mongoose";
-import { Controller } from "./controllers/controller.interface";
+import { Controller } from "./controllers/controller.type";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import { HttpException } from "./middlewares/exceptions/http.exception";
 import { fakeDelayMiddleware } from "./middlewares/fake_delay.middleware";

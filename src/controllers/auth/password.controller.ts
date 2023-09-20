@@ -25,7 +25,7 @@ import { PasswordResetTokenModel } from "../../models/tokens/password_reset_toke
 import { UserModel } from "../../models/user/user";
 import { catchError } from "../../utils/catch_error";
 import { MailBot } from "../../utils/mail.bot";
-import { Controller } from "../controller.interface";
+import { Controller } from "../controller.type";
 
 export class PasswordController implements Controller {
     router = Router();

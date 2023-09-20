@@ -1,17 +1,17 @@
 import { Request, Response, Router } from "express";
-import { ReqUser, authMiddleware } from "../middlewares/auth.middleware";
+import { ReqUser, authMiddleware } from "../../middlewares/auth.middleware";
 import {
     CreateGroupData,
     createGroupSchema,
-} from "../middlewares/schemas/group/create_group.schema";
-import { validateMiddleware } from "../middlewares/validate.middleware";
-import { GroupModel } from "../models/group/group";
-import { catchError } from "../utils/catch_error";
-import { Controller } from "./controller.interface";
+} from "../../middlewares/schemas/group/create_group.schema";
+import { validateMiddleware } from "../../middlewares/validate.middleware";
+import { GroupModel } from "../../models/group/group";
+import { catchError } from "../../utils/catch_error";
+import { Controller } from "../controller.type";
 
-export class GroupController implements Controller {
+export class GroupsController implements Controller {
     public router = Router();
-    public path = "/group";
+    public path = "/groups";
     private readonly group = GroupModel;
 
     constructor() {

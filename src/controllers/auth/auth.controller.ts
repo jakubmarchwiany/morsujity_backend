@@ -19,15 +19,15 @@ import {
 import { validateMiddleware } from "../../middlewares/validate.middleware";
 import { TmpUserModel } from "../../models/tmp_user/tmp_user_model";
 import { AuthenticationTokenModel } from "../../models/tokens/authentication_token/authentication_token";
-import { DataStoredInToken } from "../../models/tokens/authentication_token/authentication_token_interface";
+import { DataStoredInToken } from "../../models/tokens/authentication_token/data_stored_in_token.type";
 import { UserModel } from "../../models/user/user";
 import { UserDataModel } from "../../models/user_data/user_data";
 import { catchError } from "../../utils/catch_error";
 import { MailBot } from "../../utils/mail.bot";
 import { ENV } from "../../utils/validate_env";
-import { Controller } from "../controller.interface";
+import { Controller } from "../controller.type";
 
-const { JWT_SECRET, AUTHENTICATION_TOKEN_EXPIRE_AFTER, USER_APP_DOMAIN } = ENV;
+const { JWT_SECRET, TOKEN_AUTHENTICATION_EXPIRE_AFTER: AUTHENTICATION_TOKEN_EXPIRE_AFTER, USER_APP_DOMAIN } = ENV;
 
 export class AuthController implements Controller {
     public router = Router();
