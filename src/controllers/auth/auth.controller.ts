@@ -27,7 +27,11 @@ import { MailBot } from "../../utils/mail.bot";
 import { ENV } from "../../utils/validate_env";
 import { Controller } from "../controller.type";
 
-const { JWT_SECRET, TOKEN_AUTHENTICATION_EXPIRE_AFTER: AUTHENTICATION_TOKEN_EXPIRE_AFTER, USER_APP_DOMAIN } = ENV;
+const {
+    JWT_SECRET,
+    TOKEN_AUTHENTICATION_EXPIRE_AFTER: AUTHENTICATION_TOKEN_EXPIRE_AFTER,
+    USER_APP_DOMAIN,
+} = ENV;
 
 export class AuthController implements Controller {
     public router = Router();
@@ -168,13 +172,17 @@ export class AuthController implements Controller {
 
                 await this.tmpUser.deleteMany({ email: email }, { session });
 
-                let userData = await this.userData.create({ pseudonym });
-                await this.user.create({
-                    email,
-                    password,
-                    pseudonym,
-                    data: userData._id,
-                });
+                let userData = new this.userData({ pseudonym }, { session });
+                userData.save({ session });
+                await this.user.create(
+                    {
+                        email,
+                        password,
+                        pseudonym,
+                        data: userData._id,
+                    },
+                    { session }
+                );
 
                 await session.commitTransaction();
                 res.status(201).send({ message: "Udało się zweryfikować e-mail" });

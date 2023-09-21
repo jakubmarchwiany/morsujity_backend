@@ -1,21 +1,15 @@
 import { InferSchemaType, model, Schema } from "mongoose";
-import { GroupPermission, GroupStatus } from "./group_interface";
-
-const MemberSchema = new Schema({ name: String });
+import { GroupStatus } from "./group_status.enum";
+import { memberSchema } from "./member";
 
 const groupSchema = new Schema({
-    status: { type: String, default: GroupStatus.ACTIVE },
-    name: { type: String },
-    description: { type: String },
-    coordinates: { type: [Number, Number] },
+    status: { type: Number, default: GroupStatus.ACTIVE, require: true },
+    type: { type: Number, require: true },
+    name: { type: String, require: true },
+    description: { type: String, require: true },
+    coordinates: { type: [Number, Number], require: true },
     requestsToJoin: [{ type: Schema.Types.ObjectId, ref: "UserData" }],
-    members: [
-        {
-            _id: false,
-            member: { type: Schema.Types.ObjectId, ref: "UserData" },
-            permission: { type: String, default: GroupPermission.CASUAL },
-        },
-    ],
+    members: [memberSchema],
 });
 
 type Group = InferSchemaType<typeof groupSchema>;
