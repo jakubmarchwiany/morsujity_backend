@@ -7,8 +7,8 @@ const createActivitySchema = object({
         duration: number()
             .required("'duration' wymagane")
             .min(1, "Minimalna długość aktywności to 1 s")
-            .max(3659, "Maksymalna długość aktywności to 1h"),
-    }),
+            .max(3659, "Maksymalna długość aktywności to 1h")
+    })
 });
 type CreateActivityData = InferType<typeof createActivitySchema>;
 

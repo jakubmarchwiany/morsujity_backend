@@ -14,8 +14,8 @@ const registerUserSchema = object({
             .matches(/(?=.*[a-z])/, "Musi zawierać mała literę")
             .matches(/(?=.*[A-Z])/, "Musi zawierać dużą literę")
             .matches(/(?=.*[0-9])/, "Musi zawierać cyfrę")
-            .matches(/(?=.*[!@#$%^&*])/, "Musi zawierać znak specjalny (! @ # $ % ^ & *)"),
-    }),
+            .matches(/(?=.*[!@#$%^&*])/, "Musi zawierać znak specjalny (! @ # $ % ^ & *)")
+    })
 });
 type RegisterUserData = InferType<typeof registerUserSchema>;
 

@@ -4,11 +4,11 @@ import { ReqUser, authMiddleware } from "../../../middlewares/auth.middleware";
 import { HttpException } from "../../../middlewares/exceptions/http.exception";
 import {
     DeleteActivityData,
-    deleteActivitySchema,
+    deleteActivitySchema
 } from "../../../middlewares/schemas/activity/delete_activity.schema";
 import {
     CreateActivityData,
-    createActivitySchema,
+    createActivitySchema
 } from "../../../middlewares/schemas/activity/new_activity.schema";
 import { validateMiddleware } from "../../../middlewares/validate.middleware";
 import { ActivityModel } from "../../../models/user_data/activity";
@@ -31,18 +31,18 @@ export class ActivityController implements Controller {
 
     private initializeRoutes() {
         this.router.post(
-            `/create`,
+            "/create",
             validateMiddleware(createActivitySchema),
             authMiddleware,
             catchError(this.createActivityAndUpdateRank)
         );
         this.router.post(
-            `/delete`,
+            "/delete",
             validateMiddleware(deleteActivitySchema),
             authMiddleware,
             catchError(this.deleteActivity)
         );
-        this.router.get(`/all`, authMiddleware, catchError(this.getAllActivitities));
+        this.router.get("/all", authMiddleware, catchError(this.getAllActivitities));
     }
 
     private readonly createActivityAndUpdateRank = async (
@@ -52,7 +52,7 @@ export class ActivityController implements Controller {
         const { type, duration, date } = req.body;
         console.log(type);
         const resData = await this.userData.findById(req.user.dataId, {
-            "statistics.totalActivitiesTime": 1,
+            "statistics.totalActivitiesTime": 1
         });
 
         const statistics = resData!.statistics;
@@ -70,7 +70,7 @@ export class ActivityController implements Controller {
                 owner: req.user.userId,
                 type,
                 date,
-                duration,
+                duration
             });
             activity.save({ session });
 
@@ -80,15 +80,15 @@ export class ActivityController implements Controller {
                     $set: {
                         "statistics.rank": rank,
                         "statistics.subRank": subRank,
-                        "statistics.totalActivitiesTime": totalActivitiesTime,
-                    },
+                        "statistics.totalActivitiesTime": totalActivitiesTime
+                    }
                 },
                 { session }
             );
 
             res.send({
                 message: "Udało się dodać aktywności",
-                data: { rank, subRank, activityId: activity._id },
+                data: { rank, subRank, activityId: activity._id }
             });
             await session.commitTransaction();
         } catch (error) {
@@ -110,7 +110,7 @@ export class ActivityController implements Controller {
 
         if (activity) {
             const resData = await this.userData.findById(req.user.dataId, {
-                "statistics.totalActivitiesTime": 1,
+                "statistics.totalActivitiesTime": 1
             });
 
             const statistics = resData!.statistics;
@@ -132,15 +132,15 @@ export class ActivityController implements Controller {
                         $set: {
                             "statistics.rank": rank,
                             "statistics.subRank": subRank,
-                            "statistics.totalActivitiesTime": totalActivitiesTime,
-                        },
+                            "statistics.totalActivitiesTime": totalActivitiesTime
+                        }
                     },
                     { session }
                 );
 
                 res.send({
                     message: "Udało się usunąć aktywności",
-                    data: { rank, subRank },
+                    data: { rank, subRank }
                 });
                 await session.commitTransaction();
             } catch (error) {
@@ -160,8 +160,8 @@ export class ActivityController implements Controller {
     ): { rank: Rank; subRank: Rank } => {
         const sumTime = totalTime[0] + totalTime[1];
 
-        let rank = RANKS[0],
-            subRank = SUB_RANKS[0];
+        let rank: Rank = RANKS[0],
+            subRank: Rank = SUB_RANKS[0];
 
         for (let i = 0; i < RANKS.length; i++) {
             if (sumTime < RANKS[i].maxValue) {
@@ -182,12 +182,12 @@ export class ActivityController implements Controller {
 
     private readonly getAllActivitities = async (req: Request & ReqUser, res: Response) => {
         const allActivities = await this.activity.find({ owner: req.user.userId }, null, {
-            order: { date: -1 },
+            order: { date: -1 }
         });
         console.log(allActivities);
         res.send({
             data: allActivities,
-            message: "Udało się pobrać wszystkie aktywności",
+            message: "Udało się pobrać wszystkie aktywności"
         });
     };
 }

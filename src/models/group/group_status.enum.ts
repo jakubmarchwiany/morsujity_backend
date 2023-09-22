@@ -1,4 +1,4 @@
 export enum GroupStatus {
     INACTIVE,
-    ACTIVE,
+    ACTIVE
 }

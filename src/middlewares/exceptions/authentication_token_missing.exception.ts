@@ -5,4 +5,3 @@ export class AuthenticationTokenMissingException extends HttpException {
         super(401, "Brak tokenu autoryzacji");
     }
 }
-

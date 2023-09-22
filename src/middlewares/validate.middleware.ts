@@ -8,7 +8,7 @@ export const validateMiddleware = (schema: Schema) => {
             .validate({
                 body: req.body,
                 query: req.query,
-                params: req.params,
+                params: req.params
             })
             .then(() => {
                 next();

@@ -1,0 +1,39 @@
+{
+    "root": true,
+    "env": {
+        "es2021": true,
+        "node": true
+    },
+    "parser": "@typescript-eslint/parser",
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "airbnb-typescript/base"
+    ],
+    "parserOptions": {
+        "project": "tsconfig.json"
+    },
+    "plugins": ["@typescript-eslint"],
+    "rules": {
+        "@typescript-eslint/indent": [2, 4],
+        "@typescript-eslint/quotes": [2, "double"],
+        "@typescript-eslint/comma-dangle": [2, "never"],
+        "@typescript-eslint/lines-between-class-members": [0, { "exceptAfterSingleLine": 0 }],
+        "@typescript-eslint/naming-convention": [
+            "error",
+            {
+                "selector": ["variable"],
+                "format": ["strictCamelCase", "PascalCase", "UPPER_CASE"],
+                "filter": {
+                    "regex": "^_id$",
+                    "match": false
+                }
+            }
+        ],
+        "import/extensions": 0,
+        "import/no-extraneous-dependencies": 0
+    },
+    "globals": {
+        "Express": "readonly"
+    }
+}

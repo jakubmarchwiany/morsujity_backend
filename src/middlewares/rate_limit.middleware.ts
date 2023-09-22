@@ -6,5 +6,5 @@ export const rateLimitMiddleware = rateLimiter({
     handler: (request, response, next, options) =>
         response
             .status(options.statusCode)
-            .send({ message: "Za dużo zapytań, spróbuj ponownie za chwilę" }),
+            .send({ message: "Za dużo zapytań, spróbuj ponownie za chwilę" })
 });

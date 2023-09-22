@@ -8,7 +8,7 @@ const userSchema = new Schema(
         password: { type: String, required: true },
         status: { type: String, default: UserStatus.ACTIVE, required: true },
         type: { type: String, default: UserType.USER, required: true },
-        data: { type: Schema.Types.ObjectId, ref: "UserData", required: true },
+        data: { type: Schema.Types.ObjectId, ref: "UserData", required: true }
     },
     { _id: true }
 );

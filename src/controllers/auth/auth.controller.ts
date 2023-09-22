@@ -10,11 +10,11 @@ import { WrongCredentialsException } from "../../middlewares/exceptions/wrong_cr
 import { LoginUserData, loginUserSchema } from "../../middlewares/schemas/auth/login_user.schema";
 import {
     RegisterUserData,
-    registerUserSchema,
+    registerUserSchema
 } from "../../middlewares/schemas/auth/register_user.schema";
 import {
     EmailTokenData,
-    verifyUserEmailSchema,
+    verifyUserEmailSchema
 } from "../../middlewares/schemas/auth/verify_user_email.schema";
 import { validateMiddleware } from "../../middlewares/validate.middleware";
 import { TmpUserModel } from "../../models/tmp_user/tmp_user_model";
@@ -30,7 +30,7 @@ import { Controller } from "../controller.type";
 const {
     JWT_SECRET,
     TOKEN_AUTHENTICATION_EXPIRE_AFTER: AUTHENTICATION_TOKEN_EXPIRE_AFTER,
-    USER_APP_DOMAIN,
+    USER_APP_DOMAIN
 } = ENV;
 
 export class AuthController implements Controller {
@@ -48,18 +48,18 @@ export class AuthController implements Controller {
 
     private initializeRoutes() {
         this.router.post(
-            `/login`,
+            "/login",
             validateMiddleware(loginUserSchema),
             catchError(this.createAuthToken)
         );
-        this.router.get(`/logout`, authMiddleware, catchError(this.deleteAuthToken));
+        this.router.get("/logout", authMiddleware, catchError(this.deleteAuthToken));
         this.router.post(
-            `/register`,
+            "/register",
             validateMiddleware(registerUserSchema),
             catchError(this.createTmpUserAndSendEmail)
         );
         this.router.post(
-            `/verify-user-email`,
+            "/verify-user-email",
             validateMiddleware(verifyUserEmailSchema),
             catchError(this.verifyEmailAndCreateUser)
         );
@@ -79,15 +79,18 @@ export class AuthController implements Controller {
                     user._id.toString(),
                     user.data.toString()
                 );
-                await this.authenticationToken.create({ token: tokenString, owner: user._id });
+                await this.authenticationToken.create({
+                    token: tokenString,
+                    owner: user._id
+                });
 
                 res.send({
                     data: {
                         expires: AUTHENTICATION_TOKEN_EXPIRE_AFTER,
                         domain: USER_APP_DOMAIN,
-                        token: tokenString,
+                        token: tokenString
                     },
-                    message: "Udało się zalogować",
+                    message: "Udało się zalogować"
                 });
             } else {
                 throw new WrongCredentialsException();
@@ -103,20 +106,22 @@ export class AuthController implements Controller {
     private createAuthJwtToken(userID: string, dataID: string): string {
         const dataStoredInToken: DataStoredInToken = {
             userId: userID,
-            dataId: dataID,
+            dataId: dataID
         };
 
         return sign(dataStoredInToken, JWT_SECRET, {
-            expiresIn: AUTHENTICATION_TOKEN_EXPIRE_AFTER,
+            expiresIn: AUTHENTICATION_TOKEN_EXPIRE_AFTER
         });
     }
 
     private readonly deleteAuthToken = async (req: Request, res: Response) => {
-        const bearerHeader = req.headers["authorization"]!.substring(7);
-        const response = await this.authenticationToken.deleteOne({ token: bearerHeader });
+        const bearerHeader = req.headers.authorization!.substring(7);
+        const response = await this.authenticationToken.deleteOne({
+            token: bearerHeader
+        });
 
         if (response.deletedCount == 0)
-            throw new HttpException(400, `Token autoryzacyjny nie istnieje`);
+            throw new HttpException(400, "Token autoryzacyjny nie istnieje");
 
         res.send({ message: "Udało się wylogować" });
     };
@@ -138,14 +143,14 @@ export class AuthController implements Controller {
                 const tmpUser = new this.tmpUser({
                     pseudonym,
                     email,
-                    password: hashedPassword,
+                    password: hashedPassword
                 });
                 await this.mailBot.sendMailVerificationEmail(tmpUser.email, tmpUser._id.toString());
                 await tmpUser.save({ session });
                 await session.commitTransaction();
 
                 res.status(201).send({
-                    message: "Udało się utworzyć konto. Mail z potwierdzeniem wysłany na email",
+                    message: "Udało się utworzyć konto. Mail z potwierdzeniem wysłany na email"
                 });
             } catch (error) {
                 await session.abortTransaction();
@@ -172,14 +177,14 @@ export class AuthController implements Controller {
 
                 await this.tmpUser.deleteMany({ email: email }, { session });
 
-                let userData = new this.userData({ pseudonym }, { session });
+                const userData = new this.userData({ pseudonym }, { session });
                 userData.save({ session });
                 await this.user.create(
                     {
                         email,
                         password,
                         pseudonym,
-                        data: userData._id,
+                        data: userData._id
                     },
                     { session }
                 );

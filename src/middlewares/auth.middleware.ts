@@ -15,7 +15,7 @@ export function authMiddleware(
     response: Response,
     next: NextFunction
 ) {
-    const bearerHeader = request.headers["authorization"];
+    const bearerHeader = request.headers.authorization;
 
     if (bearerHeader) {
         const bearer = bearerHeader.substring(7);
@@ -24,7 +24,9 @@ export function authMiddleware(
                 if (err) {
                     next(new WrongAuthenticationTokenException());
                 } else {
-                    const isExist = await AuthenticationTokenModel.exists({ token: bearer });
+                    const isExist = await AuthenticationTokenModel.exists({
+                        token: bearer
+                    });
 
                     if (isExist) {
                         request.user = decoded as DataStoredInToken;

@@ -2,7 +2,7 @@ import bodyParser from "body-parser";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import cors, { CorsOptions } from "cors";
-import express, { Request, Response } from "express";
+import express from "express";
 import mongoose from "mongoose";
 import { Controller } from "./controllers/controller.type";
 import { errorMiddleware } from "./middlewares/error.middleware";
@@ -31,33 +31,33 @@ export class Server {
             })
             .catch((error) => {
                 console.log("Error connecting to the database");
-                console.log(error);
+                throw new Error(error);
             });
     }
 
     private initializeCors() {
         const corsOptions: CorsOptions = {
-            origin: function (origin, callback) {
+            origin(origin, callback) {
                 if (WHITELISTED_DOMAINS.split(",").indexOf(origin!) !== -1 || !origin) {
                     callback(null, true);
                 } else {
                     callback(new Error("Not allowed by CORS"));
                 }
             },
-            credentials: true,
+            credentials: true
         };
         this.app.use(cors(corsOptions));
     }
 
     private initMiddlewares() {
         this.initializeCors();
-        isDev && this.app.use(fakeDelayMiddleware);
+        if (isDev) this.app.use(fakeDelayMiddleware);
         this.app.use(rateLimitMiddleware);
         this.app.use(bodyParser.json({ limit: "10mb" }));
         this.app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
         this.app.use(
             compression({
-                threshold: 0,
+                threshold: 0
             })
         );
         this.app.use(cookieParser());
@@ -71,7 +71,7 @@ export class Server {
         controllers.forEach((controller) => {
             this.app.use(controller.path, controller.router);
         });
-        this.app.use("*", (req: Request, res: Response) => {
+        this.app.use("*", () => {
             throw new HttpException(404, "Not found");
         });
     }

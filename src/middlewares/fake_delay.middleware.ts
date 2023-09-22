@@ -6,6 +6,6 @@ export const fakeDelayMiddleware = async function (
     res: Response,
     next: NextFunction
 ) {
-    await sleep(500);
+    await sleep(0);
     next();
 };

@@ -12,10 +12,9 @@ const loginUserSchema = object({
             .matches(/(?=.*[a-z])/, "Podano nieprawidłowe dane uwierzytelniające")
             .matches(/(?=.*[A-Z])/, "Podano nieprawidłowe dane uwierzytelniające")
             .matches(/(?=.*[0-9])/, "Podano nieprawidłowe dane uwierzytelniające")
-            .matches(/(?=.*[!@#$%^&*])/, "Podano nieprawidłowe dane uwierzytelniające"),
-    }),
+            .matches(/(?=.*[!@#$%^&*])/, "Podano nieprawidłowe dane uwierzytelniające")
+    })
 });
 type LoginUserData = InferType<typeof loginUserSchema>;
 
 export { LoginUserData, loginUserSchema };
-

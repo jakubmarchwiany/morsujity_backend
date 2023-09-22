@@ -9,7 +9,11 @@ const memberSchema = new Schema(
         rank: { type: rankSchema, default: firstRank, require: true },
         subRank: { type: rankSchema, default: firstSubRank, require: true },
         totalActivityTime: { type: Number, default: 0, require: true },
-        permission: { type: Number, default: GroupPermission.NORMAL, require: true },
+        permission: {
+            type: Number,
+            default: GroupPermission.NORMAL,
+            require: true
+        }
     },
     { _id: false }
 );

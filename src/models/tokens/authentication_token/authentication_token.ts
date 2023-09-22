@@ -6,7 +6,7 @@ const { TOKEN_AUTHENTICATION_EXPIRE_AFTER: AUTHENTICATION_TOKEN_EXPIRE_AFTER } =
 const AuthenticationTokenSchema = new Schema({
     token: { type: String, required: true },
     owner: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    expireIn: { type: Date, default: new Date() },
+    expireIn: { type: Date, default: new Date() }
 });
 
 AuthenticationTokenSchema.index(

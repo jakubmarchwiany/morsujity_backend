@@ -4,7 +4,7 @@ import { ReqUser, authMiddleware } from "../../middlewares/auth.middleware";
 import { HttpException } from "../../middlewares/exceptions/http.exception";
 import {
     CreateGroupData,
-    createGroupSchema,
+    createGroupSchema
 } from "../../middlewares/schemas/group/create_group.schema";
 import { validateMiddleware } from "../../middlewares/validate.middleware";
 import { GroupModel } from "../../models/group/group";
@@ -48,7 +48,7 @@ export class GroupsController implements Controller {
                 name,
                 description,
                 coordinates,
-                members: [{ member: req.user.dataId, permission: GroupPermission.ADMIN }],
+                members: [{ member: req.user.dataId, permission: GroupPermission.ADMIN }]
             });
 
             await this.userData.updateOne(
@@ -59,7 +59,10 @@ export class GroupsController implements Controller {
 
             await group.save({ session });
 
-            res.send({ message: "Udało się stworzyć grupę" });
+            res.send({
+                message: "Udało się stworzyć grupę",
+                data: { _id: group._id, name: name }
+            });
             await session.commitTransaction();
         } catch (error) {
             await session.abortTransaction();

@@ -10,8 +10,8 @@ const updatePasswordWithTokenSchema = object({
             .matches(/(?=.*[A-Z])/, "Musi zawierać dużą literę")
             .matches(/(?=.*[0-9])/, "Musi zawierać cyfrę")
             .matches(/(?=.*[!@#$%^&*])/, "Musi zawierać znak specjalny (! @ # $ % ^ & *)"),
-        token: string().required("'token' wymagane").length(36, "Token niepoprawny"),
-    }),
+        token: string().required("'token' wymagane").length(36, "Token niepoprawny")
+    })
 });
 type UpdatePasswordWithTokenData = InferType<typeof updatePasswordWithTokenSchema>;
 

@@ -4,7 +4,7 @@ import { ReqUser, authMiddleware } from "../../middlewares/auth.middleware";
 import { HttpException } from "../../middlewares/exceptions/http.exception";
 import {
     ChangePseudonymData,
-    changePseudonymSchema,
+    changePseudonymSchema
 } from "../../middlewares/schemas/user/change_pseudonym.schema";
 import { validateMiddleware } from "../../middlewares/validate.middleware";
 import { UserDataModel } from "../../models/user_data/user_data";
@@ -27,18 +27,18 @@ export class SettingsController implements Controller {
 
     private initializeRoutes() {
         this.router.post(
-            `/update-pseudonym`,
+            "/update-pseudonym",
             validateMiddleware(changePseudonymSchema),
             authMiddleware,
             catchError(this.updateUserPseudonym)
         );
         this.router.post(
-            `/update-image`,
+            "/update-image",
             authMiddleware,
             this.imageBot.multer.single("userImage"),
             catchError(this.updateUserImage)
         );
-        this.router.get(`/set-image-to-def`, authMiddleware, catchError(this.setUserImageToDef));
+        this.router.get("/set-image-to-def", authMiddleware, catchError(this.setUserImageToDef));
     }
 
     private readonly updateUserPseudonym = async (
@@ -66,7 +66,9 @@ export class SettingsController implements Controller {
             session.startTransaction();
 
             const fileName = await this.imageBot.saveNewUserImage(req.file);
-            const userData = await this.userData.findById(req.user.dataId, { image: 1 });
+            const userData = await this.userData.findById(req.user.dataId, {
+                image: 1
+            });
 
             if (userData!.image !== DEF_USER_IMAGE) {
                 await this.imageBot.deleteUserImage(userData!.image);
@@ -80,7 +82,7 @@ export class SettingsController implements Controller {
             await session.commitTransaction();
             res.send({
                 message: "Udało się zaktualizować zdjęcie",
-                image: imageUrl,
+                image: imageUrl
             });
         } catch (error) {
             await session.abortTransaction();
@@ -95,7 +97,9 @@ export class SettingsController implements Controller {
         try {
             session.startTransaction();
 
-            const userData = await this.userData.findById(req.user.dataId, { image: 1 });
+            const userData = await this.userData.findById(req.user.dataId, {
+                image: 1
+            });
             if (userData!.image === DEF_USER_IMAGE)
                 return res.send({ message: "Użytkownik ma już domyślne zdjęcie" });
 
@@ -109,7 +113,7 @@ export class SettingsController implements Controller {
             await session.commitTransaction();
             res.send({
                 message: "Udało ustawić domyślne zdjęcie",
-                image: imageUrl,
+                image: imageUrl
             });
         } catch (error) {
             await session.abortTransaction();

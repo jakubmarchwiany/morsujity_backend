@@ -9,15 +9,15 @@ import { WrongAuthenticationTokenException } from "../../middlewares/exceptions/
 import { WrongCredentialsException } from "../../middlewares/exceptions/wrong_credentials.exception";
 import {
     UpdatePasswordData,
-    updatePasswordSchema,
+    updatePasswordSchema
 } from "../../middlewares/schemas/auth/change_password.schema";
 import {
     UpdatePasswordWithTokenData,
-    updatePasswordWithTokenSchema,
+    updatePasswordWithTokenSchema
 } from "../../middlewares/schemas/auth/new_password.schema";
 import {
     ResetPasswordEmailData,
-    resetPasswordEmailSchema,
+    resetPasswordEmailSchema
 } from "../../middlewares/schemas/auth/reset_password_Email.schema";
 import { validateMiddleware } from "../../middlewares/validate.middleware";
 import { AuthenticationTokenModel } from "../../models/tokens/authentication_token/authentication_token";
@@ -41,17 +41,17 @@ export class PasswordController implements Controller {
 
     private initializeRoutes() {
         this.router.post(
-            `/reset-email`,
+            "/reset-email",
             validateMiddleware(resetPasswordEmailSchema),
             catchError(this.createPasswordResetTokenAndSendEmail)
         );
         this.router.post(
-            `/update-with-token`,
+            "/update-with-token",
             validateMiddleware(updatePasswordWithTokenSchema),
             catchError(this.updatePasswordWithToken)
         );
         this.router.post(
-            `/update`,
+            "/update",
             authMiddleware,
             validateMiddleware(updatePasswordSchema),
             catchError(this.updatePassword)
@@ -94,7 +94,7 @@ export class PasswordController implements Controller {
 
         const hashedToken = sha256(token);
         const foundToken = await this.passwordResetToken.findOne({
-            token: hashedToken,
+            token: hashedToken
         });
 
         if (foundToken == null) {
@@ -107,7 +107,7 @@ export class PasswordController implements Controller {
 
                 await this.passwordResetToken.deleteMany(
                     {
-                        userId: foundToken.userId,
+                        userId: foundToken.userId
                     },
                     { session }
                 );
@@ -139,7 +139,9 @@ export class PasswordController implements Controller {
     ) => {
         const { newPassword, oldPassword } = req.body;
 
-        const user = await this.userModel.findById(req.user.userId, { password: 1 });
+        const user = await this.userModel.findById(req.user.userId, {
+            password: 1
+        });
         if (user) {
             const isPasswordMatching = compareSync(oldPassword, user.password);
             if (isPasswordMatching) {
@@ -151,7 +153,10 @@ export class PasswordController implements Controller {
                     session.startTransaction();
 
                     await user.save({ session });
-                    await this.authenticationToken.deleteMany({ owner: req.user.userId }, { session });
+                    await this.authenticationToken.deleteMany(
+                        { owner: req.user.userId },
+                        { session }
+                    );
 
                     res.send({ message: "Hasło zostało zmienione" });
                     await session.commitTransaction();

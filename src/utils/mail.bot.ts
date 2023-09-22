@@ -22,8 +22,8 @@ export class MailBot {
                     port: MAIL_PORT,
                     auth: {
                         user: MAIL_USER,
-                        pass: MAIL_PASS,
-                    },
+                        pass: MAIL_PASS
+                    }
                 })
             );
         } catch (e) {
@@ -32,6 +32,7 @@ export class MailBot {
             }, 10000);
         }
     }
+
     public sendMailVerificationEmail = async (targetMail: string, token: string) => {
         const html = fs.readFileSync(
             path.resolve(__dirname, "email_messages/verification_email.html"),
@@ -39,7 +40,7 @@ export class MailBot {
         );
         const template = handlebars.compile(html);
         const variables = {
-            endPoint: FRONT_URL_ADDRESS + "/auth/verify-email?token=" + token,
+            endPoint: `${FRONT_URL_ADDRESS}/auth/verify-email?token=${token}`
         };
         const htmlToSend = template(variables);
 
@@ -47,7 +48,7 @@ export class MailBot {
             from: MAIL_FROM, // sender address
             to: targetMail, // list of receivers
             subject: "Zweryfikuj konto", // Subject line
-            html: htmlToSend, // html body
+            html: htmlToSend // html body
         };
 
         return this.transporter.sendMail(mailOptions);
@@ -60,7 +61,7 @@ export class MailBot {
         );
         const template = handlebars.compile(html);
         const variables = {
-            endPoint: FRONT_URL_ADDRESS + "/auth/new-password?token=" + token,
+            endPoint: `${FRONT_URL_ADDRESS}/auth/verify-email?token=${token}`
         };
         const htmlToSend = template(variables);
 
@@ -68,7 +69,7 @@ export class MailBot {
             from: MAIL_FROM, // sender address
             to: targetMail, // list of receivers
             subject: "Zresetuj Hasło", // Subject line
-            html: htmlToSend, // html body
+            html: htmlToSend // html body
         };
 
         return this.transporter.sendMail(mailOptions);

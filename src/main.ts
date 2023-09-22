@@ -12,7 +12,7 @@ const server = new Server([
     new UserController(),
     new ActivityController(),
     new SettingsController(),
-    new GroupsController(),
+    new GroupsController()
 ]);
 
 server.listen();

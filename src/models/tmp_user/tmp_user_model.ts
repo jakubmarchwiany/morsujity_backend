@@ -7,7 +7,7 @@ const tmpUserSchema = new Schema({
     email: { type: String, required: true },
     password: { type: String, required: true },
     pseudonym: { type: String, required: true },
-    expireIn: { type: Date, default: new Date(), required: true },
+    expireIn: { type: Date, default: new Date(), required: true }
 });
 
 tmpUserSchema.index({ expireIn: 1 }, { expireAfterSeconds: USER_EXPIRE_AFTER, name: "expireIn" });

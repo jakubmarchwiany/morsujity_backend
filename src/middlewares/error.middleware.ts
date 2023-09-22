@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextFunction, Request, Response } from "express";
 import { ENV } from "../utils/validate_env";
 import { HttpException } from "./exceptions/http.exception";
@@ -22,6 +23,6 @@ export function errorMiddleware(
 
     response.status(status).send({
         message,
-        status,
+        status
     });
 }

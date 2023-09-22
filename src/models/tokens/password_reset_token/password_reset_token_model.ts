@@ -6,21 +6,21 @@ const { TOKEN_RESET_PASSWORD_EXPIRE_AFTER: RESET_PASSWORD_TOKEN_EXPIRE_AFTER } =
 const passwordResetTokenSchema = new Schema({
     expireIn: {
         type: Date,
-        default: new Date(),
+        default: new Date()
     },
     token: { type: String, required: true },
     userId: {
         type: Schema.Types.ObjectId,
         ref: "User",
-        required: true,
-    },
+        required: true
+    }
 });
 
 passwordResetTokenSchema.index(
     { expireIn: 1 },
     {
         expireAfterSeconds: RESET_PASSWORD_TOKEN_EXPIRE_AFTER,
-        name: "expireIn",
+        name: "expireIn"
     }
 );
 

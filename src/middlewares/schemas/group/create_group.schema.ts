@@ -14,8 +14,8 @@ const createGroupSchema = object({
         coordinates: array()
             .required("'coordinates' wymagane")
             .of(number())
-            .length(2, "Współrzędne muszą zawierać długość i szerokość geograficzną"),
-    }),
+            .length(2, "Współrzędne muszą zawierać długość i szerokość geograficzną")
+    })
 });
 type CreateGroupData = InferType<typeof createGroupSchema>;
 
